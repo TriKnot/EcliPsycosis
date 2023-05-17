@@ -2,6 +2,8 @@
 
 
 #include "PlayerCharacter.h"
+
+#include "HurtBox.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Components/BoxComponent.h"
@@ -23,8 +25,8 @@ APlayerCharacter::APlayerCharacter()
 	CameraComponent->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 
 	// Create Hit Box
-	HitBox = CreateDefaultSubobject<UBoxComponent>(TEXT("HitBox"));
-	HitBox->SetupAttachment(GetMesh());
+	HurtBox = CreateDefaultSubobject<UHurtBox>(TEXT("HurtBox"));
+	HurtBox->SetupAttachment(RootComponent);
 
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -96,7 +98,7 @@ void APlayerCharacter::Dash()
 	bCanDoAction = false;
 
 	// Calculate offset in z axis to make it go from center of hitbox
-	const FVector ZOffset = FVector(0.0f, 0.0f, HitBox->GetScaledBoxExtent().Z);
+	const FVector ZOffset = FVector(0.0f, 0.0f, HurtBox->GetScaledBoxExtent().Z);
 	
 	// Calculate Target Destination
 	FVector TargetDestination = GetActorLocation() + GetActorForwardVector() * DashDistance + ZOffset;
@@ -141,7 +143,7 @@ void APlayerCharacter::ExecuteDash(FVector TargetDestination)
 	CollisionParams.AddIgnoredActor(this);
 	
 	// Calculate Dash Start Location (Starts at edge of hitbox in front of character)
-	FVector DashStartLocation = GetActorLocation() + GetActorForwardVector() * HitBox->GetScaledBoxExtent().X;
+	FVector DashStartLocation = GetActorLocation() + GetActorForwardVector() * HurtBox->GetScaledBoxExtent().X;
 	// Calculate Dash Tick End Location
 	FVector DashTickEndLocation = DashStartLocation + DashTickDeltaMove;
 

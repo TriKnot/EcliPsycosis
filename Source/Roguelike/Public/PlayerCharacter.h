@@ -61,7 +61,7 @@ private:
 
 	/** Hit Box */ 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = HitBox, meta = (AllowPrivateAccess = "true"))
-	class UBoxComponent* HitBox;
+	class UHurtBox* HurtBox;
 
 	/** Dash Timer Handle */
 	FTimerHandle DashTimerHandle;
@@ -75,14 +75,12 @@ private:
 	float AccelerationSpeed;
 	
 	/**
-	 * Dash default distance
 	 * Distance / Speed = Time
 	 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dash", meta = (AllowPrivateAccess = "true"));
 	float DashDistance = 1000.0f;
 
 	/**
-	 * Dash default speed
 	 * Distance / Speed = Time
 	 **/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dash", meta = (AllowPrivateAccess = "true"));
@@ -98,9 +96,10 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Flags", meta = (AllowPrivateAccess = "true"))
 	bool bCanDoAction;
 
-	/* Storing Weapon Mode Flag*/ //TODO: EditAnywhere needs to be Changed to VisibleAnywhere. It is Edit so that we can easily Test
+	/* Storing Weapon Mode Flag */ //TODO: EditAnywhere needs to be Changed to VisibleAnywhere. It is Edit so that we can easily Test
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flags", meta = (AllowPrivateAccess = "true"))
 	EWeaponMode CurrentWeapon;
+	
 public:
 	/** Move Function */
 	UFUNCTION(BlueprintCallable , Category = "Movement")
@@ -113,7 +112,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Dash")
 	void Dash();
 
-	/** Terminate Dash Ability*/
+	/** Terminate Dash Ability */
 	UFUNCTION(BlueprintCallable, Category = "Dash")
 	void EndDash();
 
@@ -137,8 +136,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Attacks")
 	void WeaponAbility();
 
-	
+
 private:
+	/** Dash Function -> Recursively calling itself until dash is finished */
 	UFUNCTION()
 	void ExecuteDash(FVector TargetDestination);
 };
