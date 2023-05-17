@@ -76,13 +76,13 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 void APlayerCharacter::MoveForward(float _InValue)
 {
 	if(bCanMove)
-		AddMovementInput(FVector(_InValue, 0.0f, 0.0f));
+		AddMovementInput(FVector(CameraComponent->GetForwardVector().X, CameraComponent->GetForwardVector().Y, 0.0f)*_InValue);
 }
 
 void APlayerCharacter::MoveRight(float _InValue)
 {
 	if(bCanMove)
-		AddMovementInput(FVector( 0.0f, _InValue, 0.0f));
+		AddMovementInput(FVector(CameraComponent->GetRightVector().X, CameraComponent->GetRightVector().Y, 0.0f)*_InValue);
 }
 
 void APlayerCharacter::Dash()
@@ -94,15 +94,26 @@ void APlayerCharacter::Dash()
 	// Disable Character Movement and Actions
 	bCanMove = false;
 	bCanDoAction = false;
+
+	// Calculate offset in z axis to make it go from center of hitbox
+	const FVector ZOffset = FVector(0.0f, 0.0f, HitBox->GetScaledBoxExtent().Z);
 	
 	// Calculate Target Destination
-	const FVector TargetDestination = GetActorLocation() + GetActorForwardVector() * DashDistance;
+	FVector TargetDestination = GetActorLocation() + GetActorForwardVector() * DashDistance + ZOffset;
 
 	// Check if anything is blocking the dash
 	FHitResult HitResult;
 	FCollisionQueryParams CollisionParams;
 	CollisionParams.AddIgnoredActor(this);
-	GetWorld()->LineTraceSingleByChannel(HitResult, GetActorLocation(), TargetDestination, ECC_Visibility, CollisionParams);
+	GetWorld()->LineTraceSingleByChannel(HitResult, GetActorLocation() + ZOffset, TargetDestination, ECC_Visibility, CollisionParams);
+
+	// If something is blocking the dash, set Target Destination to HitResult
+	if( HitResult.bBlockingHit )
+	{
+		// Set Target Destination to HitResult
+		TargetDestination = HitResult.ImpactPoint;
+		UE_LOG( LogTemp, Warning, TEXT("Hit something recalculating target destination.") );
+	}
 
 	// Uncap Movement Acceleration Speed
 	GetCharacterMovement()->MaxAcceleration = 1000000.0f;
@@ -146,7 +157,11 @@ void APlayerCharacter::ExecuteDash(FVector TargetDestination)
 	}
 
 	// Check if Dash is complete and end recursion if true
-	if (FVector::Dist(GetActorLocation(), TargetDestination) < DashTickDeltaMove.Size())
+	FVector _Target = TargetDestination;
+	_Target.Z = 0;
+	FVector _Actor = GetActorLocation();
+	_Actor.Z = 0;
+	if (FVector::Dist(_Actor, _Target) < DashTickDeltaMove.Size())
 	{
 		// Add movement up to Target Destination
 		DashTickDeltaMove = TargetDestination - GetActorLocation();
@@ -178,6 +193,8 @@ void APlayerCharacter::EndDash()
 	GetCharacterMovement()->MaxAcceleration = AccelerationSpeed;
 	// Reset Max Movement Speed
 	GetCharacterMovement()->MaxWalkSpeed = MoveSpeed;
+	// Slow Character to new move speed cap immediately
+	GetCharacterMovement()->Velocity = GetCharacterMovement()->Velocity.GetSafeNormal() * MoveSpeed;
 }
 
 void APlayerCharacter::Interact()
