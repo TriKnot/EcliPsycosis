@@ -4,13 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "Components/BoxComponent.h"
+#include "Damage/DamageSystem.h"
 #include "HurtBox.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class ROGUELIKE_API UHurtBox : public UBoxComponent
+class ROGUELIKE_API UHurtBox : public UBoxComponent, public IDamageSystem
 {
 	GENERATED_BODY()
 	
