@@ -1,9 +1,11 @@
 #include "EnemyCharacter.h"
 
 #include "AIController.h"
+#include "HurtBox.h"
 #include "PlayerCharacter.h"
 #include "Components/SphereComponent.h"
 #include "Perception/AIPerceptionComponent.h"
+#include "Weapons/Core/MeleeComponent.h"
 
 
 // Sets default values
@@ -12,35 +14,19 @@ AEnemyCharacter::AEnemyCharacter()
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-
 	// Chase Trigger Sphere
-	ChaseTriggerSphere = CreateDefaultSubobject<USphereComponent>(TEXT("ChaseTriggerSphere"));
-	ChaseTriggerSphere->SetupAttachment(RootComponent);
-	ChaseTriggerSphere->SetCollisionProfileName(TEXT("Trigger"));
-	ChaseTriggerSphere->OnComponentBeginOverlap.AddDynamic(this, &AEnemyCharacter::OnChaseTriggerEnter);
+	DetectionTriggerSphere = CreateDefaultSubobject<USphereComponent>(TEXT("ChaseTriggerSphere"));
+	DetectionTriggerSphere->SetupAttachment(RootComponent);
+	DetectionTriggerSphere->SetCollisionProfileName(TEXT("Trigger"));
+	DetectionTriggerSphere->OnComponentBeginOverlap.AddDynamic(this, &AEnemyCharacter::OnChaseTriggerEnter);
 
+	// Hurt Box
+	HurtBox = CreateDefaultSubobject<UHurtBox>(TEXT("HurtBox"));
+	HurtBox->SetupAttachment(RootComponent);
 
-}
+	// Melee Component
+	MeleeComponent = CreateDefaultSubobject<UMeleeComponent>(TEXT("MeleeComponent"));
 
-void AEnemyCharacter::MoveToTargetLocation(FVector TargetLocation)
-{
-	AIController->MoveToLocation(TargetLocation, 5.0f, true, true, true);
-}
-
-void AEnemyCharacter::MoveToCharacter(ACharacter* Character)
-{
-	AIController->MoveToActor(Character, 5.0f, true, true, true);
-}
-
-void AEnemyCharacter::AttackCharacter(ACharacter* Character)
-{
-	UE_LOG( LogTemp, Warning, TEXT("AttackCharacter"));
-}
-
-void AEnemyCharacter::ChaseCharacter(ACharacter* Character)
-{
-	// Tell AI Controller to chase Character
-	AIController->MoveToActor(Character, 5.0f, true, true, true);
 }
 
 
@@ -52,10 +38,6 @@ void AEnemyCharacter::BeginPlay()
 	// Cache Player Character
 	PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetPawn());
 
-	// Get AI Controller
-	AIController = Cast<AAIController>(GetController());
-	
-
 }
 
 void AEnemyCharacter::OnChaseTriggerEnter(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
@@ -64,16 +46,14 @@ void AEnemyCharacter::OnChaseTriggerEnter(UPrimitiveComponent* OverlappedCompone
 	// Exit if not Player Character
 	if (OtherActor != PlayerCharacter)
 		return;
-
-	ChaseCharacter( PlayerCharacter );
-
 }
 
 void AEnemyCharacter::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
-	// Set Chase Trigger Sphere Radius
-	ChaseTriggerSphere->SetSphereRadius(ChaseRangeRadius);
+	// Set Detection Trigger Sphere Radius
+	if(DetectionTriggerSphere)
+		DetectionTriggerSphere->SetSphereRadius(ChaseRangeRadius);
 }
 
 // Called every frame
@@ -83,10 +63,25 @@ void AEnemyCharacter::Tick(float DeltaTime)
 
 }
 
-// Called to bind functionality to input
-void AEnemyCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+void AEnemyCharacter::Attack()
 {
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
+	// Initialize attack here
+	MeleeComponent->LightAttack();
+	UE_LOG(LogTemp, Error, TEXT("Attacking"));
 }
+
+void AEnemyCharacter::ReceiveDamage(float _InDamage)
+{
+	Health -= _InDamage;
+	if (Health <= 0.0f)
+	{
+		EnemyDeath();
+	}
+}
+
+void AEnemyCharacter::EnemyDeath()
+{
+	UE_LOG( LogTemp, Warning, TEXT("Enemy Death") );
+}
+
 

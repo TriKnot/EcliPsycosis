@@ -3,6 +3,8 @@
 
 #include "Weapons/Core/MeleeComponent.h"
 #include "Components/ShapeComponent.h"
+#include "Damage/DamageSystem.h"
+
 void UMeleeComponent::BeginPlay()
 {
 	Super::BeginPlay();
@@ -10,7 +12,6 @@ void UMeleeComponent::BeginPlay()
 	//TODO: Need to Find a better way to Do this 
 	for (const auto obj : _temp)
 		HitBoxes.Add(Cast<UShapeComponent>(obj));
-	UE_LOG(LogTemp, Warning, TEXT("Number of HitBoxes: %d"), HitBoxes.Num());
 	checkf(!(HitBoxes.Num() <= 0), TEXT("Add a HitBox To the MeleeComponent HitBox Array"));
 	for (const auto HitBox : HitBoxes)
 	{
@@ -23,6 +24,8 @@ void UMeleeComponent::BeginPlay()
 void UMeleeComponent::LightAttack()
 {
 	CurrentDamageValue = LightAttackDamage;
+	UE_LOG(LogTemp, Error, TEXT("Damage Amount %f"), CurrentDamageValue);
+	OnLightAttack.Broadcast();
 }
 
 void UMeleeComponent::StartLightAttack()
@@ -40,6 +43,7 @@ void UMeleeComponent::EndLightAttack()
 void UMeleeComponent::HeavyAttack()
 {
 	CurrentDamageValue = HeavyAttackDamage;
+	OnHeavyAttack.Broadcast();
 }
 
 void UMeleeComponent::StartHeavyAttack()
@@ -57,6 +61,7 @@ void UMeleeComponent::EndHeavyAttack()
 void UMeleeComponent::WeaponAbility()
 {
 	CurrentDamageValue = WeaponAbilityDamage;
+	OnWeaponAbility.Broadcast();
 }
 
 void UMeleeComponent::StartWeaponAbility()
@@ -74,11 +79,12 @@ void UMeleeComponent::EndWeaponAbility()
 
 void UMeleeComponent::OverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (!bIsAttacking && OtherActor == GetOwner() && DamagedActors.Contains(OtherActor))
+	if (!bIsAttacking || OtherActor == GetOwner() || DamagedActors.Contains(OtherActor))
 		return;
 	if (IDamageSystem* _other = Cast<IDamageSystem>(OtherComp))
 	{
-		_other->TransferDamage(CurrentDamageValue/*, CurrentEffectType*/); 
+		UE_LOG(LogTemp, Error, TEXT("UMeleeComponent::OverlapBegin"));
+		_other->TransferDamage(CurrentDamageValue + (CurrentDamageValue * AttackModifier)/*, CurrentEffectType*/); 
 		DamagedActors.Add(OtherActor);
 	}
 }

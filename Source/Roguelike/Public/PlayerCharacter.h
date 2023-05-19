@@ -8,6 +8,7 @@
 #include "CustomStructs/StructSet.h"
 #include "PlayerCharacter.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDashStateChanged, bool, bDashState);
 /*Enum Class to Track the Current Weapon Type that is Equipped*/
 UENUM(Blueprintable, BlueprintType)
 enum class EWeaponMode : uint8
@@ -22,6 +23,9 @@ class ROGUELIKE_API APlayerCharacter : public ACharacter
 	GENERATED_BODY()
 
 public:
+	UPROPERTY(BlueprintAssignable, BlueprintCallable)
+	FOnDashStateChanged OnDashStateChanged;
+
 	// Sets default values for this pawn's properties
 	APlayerCharacter();
 	virtual ~APlayerCharacter() override;
@@ -48,6 +52,10 @@ public:
 	/** Sets Current Weapon **/
 	FORCEINLINE void SetEquippedWeapon(EWeaponMode _InWeapon) { CurrentWeapon = _InWeapon; }
 
+	/** Collision testing For Picking up Items **/
+	UFUNCTION()
+	void OverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
 private:
 	/** Top down camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
@@ -64,6 +72,10 @@ private:
 	/** Hit Box */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = HitBox, meta = (AllowPrivateAccess = "true"))
 		class UHurtBox* HurtBox;
+
+	/** MeleeComponent **/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	class UMeleeComponent* MeleeComponent;
 
 	/** Dash Timer Handle */
 	FTimerHandle DashTimerHandle;
@@ -98,6 +110,10 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Flags", meta = (AllowPrivateAccess = "true"))
 		bool bCanDoAction;
 
+	/* Locking Pickup */
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Flags", meta = (AllowPrivateAccess = "true"))
+		bool bCanPickup;
+
 	/* Storing Weapon Mode Flag */ //TODO: EditAnywhere needs to be Changed to VisibleAnywhere. It is Edit so that we can easily Test
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flags", meta = (AllowPrivateAccess = "true"))
 		EWeaponMode CurrentWeapon;
@@ -111,6 +127,10 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Modifiers", meta = (AllowPrivateAccess = "true"))
 	FModifierSet ModifierSet;
+
+	FTimerHandle ItemEffectHandle;
+	FTimerDelegate ItemEffectDelegate;
+
 public:
 	/** Move Function */
 	UFUNCTION(BlueprintCallable, Category = "Movement")
@@ -154,15 +174,20 @@ public:
 private:
 	/** Dash Function -> Recursively calling itself until dash is finished */
 	UFUNCTION()
-		void ExecuteDash(FVector TargetDestination);
+	void ExecuteDash(FVector TargetDestination);
 
 	/** Function to Receive Damage **/
 	UFUNCTION()
-		void ReceiveDamage(float _InDamage/*, EEffectType _EffectType*/);
+	void ReceiveDamage(float _InDamage/*, EEffectType _EffectType*/);
 
 	/** Central Function to handle Player Death**/
 	UFUNCTION()
-		void PlayerDeath();
+	void PlayerDeath();
 
+	UFUNCTION()
 	void ImplementModifier(FModifierSet _InSet);
+
+	UFUNCTION()
+	void ClearModifier();
+
 };

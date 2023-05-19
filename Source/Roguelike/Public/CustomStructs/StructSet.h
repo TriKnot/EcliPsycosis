@@ -5,16 +5,31 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "StructSet.generated.h"
-USTRUCT(BlueprintType, Blueprintable)
+
+USTRUCT(BlueprintType)
 struct FModifierSet
 {
 	GENERATED_BODY()
 public:
+	FModifierSet() : HPModifier(0.0f), SpeedModifier(0.0f), AttackModifier(0.0f), RangeModifier(0.0f), CooldownModifier(0.0f), EffectTime(0.0f)
+	{}
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float HPModifier;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float SpeedModifier;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float AttackModifier;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float RangeModifier;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float CooldownModifier;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float EffectTime;
+
+	static FModifierSet ZERO()
+	{
+		return FModifierSet();
+	}
 };
 
 

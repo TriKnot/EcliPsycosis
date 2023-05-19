@@ -16,26 +16,15 @@ public:
 	AEnemyCharacter();
 
 private:
-	//** Move to Target */
-	UFUNCTION(BlueprintCallable, Category = AI)
-	void MoveToTargetLocation(FVector TargetLocation);
-
-	//** Move to Other Character */
-	UFUNCTION(BlueprintCallable, Category = AI)
-	void MoveToCharacter(ACharacter* Character);
-
-	//** Attack Other Character */
-	UFUNCTION(BlueprintCallable, Category = AI)
-	void AttackCharacter(ACharacter* Character);
-
-	//** Initiate chase */
-	UFUNCTION(BlueprintCallable, Category = AI)
-	void ChaseCharacter(ACharacter* Character);
 
 	//** OnChaseTriggerEnter */
 	UFUNCTION(BlueprintCallable, Category = AI)
 	void OnChaseTriggerEnter(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
 		int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	/** Melee Component */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	class UMeleeComponent* MeleeComponent;
 
 protected:
 	// Called when an instance of this is placed or spawned
@@ -49,25 +38,29 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	// Called to bind functionality to input
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	//** Attack */
+	UFUNCTION(BlueprintCallable, Category = AI)
+	void Attack();
+
+	/** Function to Receive Damage */
+	UFUNCTION()
+	void ReceiveDamage(float _InDamage/*, EEffectType _EffectType*/);
+
+	/** Central Function to handle Player Death**/
+	UFUNCTION()
+	void EnemyDeath();
 
 private:
-
-	//** AI Controller */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = AI, meta = (AllowPrivateAccess = "true"))
-	TSubclassOf<AAIController> AIControllerBP;
-
-	UPROPERTY()
-	AAIController* AIController;
 
 	//** Player Character */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = AI, meta = (AllowPrivateAccess = "true"))
 	class APlayerCharacter* PlayerCharacter;
-	
-	//** Move Speed */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI, meta = (AllowPrivateAccess = "true"))
-	float MoveSpeed;
+
+	//** Hurt Box */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = AI, meta = (AllowPrivateAccess = "true"))
+	class UHurtBox* HurtBox;
+
+	//////////////////* Stats *////////////////////
 
 	//** Health */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI, meta = (AllowPrivateAccess = "true"))
@@ -101,14 +94,9 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI, meta = (AllowPrivateAccess = "true"))
 	float ChaseRangeRadius;
 
-	// TODO: Add Phase state here when implemented
-
 public:
-	/** Waypoints */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI, meta = (AllowPrivateAccess = "true"))
-	TArray<AActor*> Waypoints;
-
+	
 	/** Chase Trigger Volume */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = AI, meta = (AllowPrivateAccess = "true"))
-	class USphereComponent* ChaseTriggerSphere;
+	class USphereComponent* DetectionTriggerSphere;
 };

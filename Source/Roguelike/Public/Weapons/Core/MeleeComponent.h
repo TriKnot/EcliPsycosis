@@ -5,9 +5,9 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "Weapon.h"
-#include "Damage/DamageSystem.h"
 #include "MeleeComponent.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAttack);
 class UShapeComponent;
 
 /**
@@ -18,6 +18,14 @@ class ROGUELIKE_API UMeleeComponent : public UActorComponent, public IWeapon
 {
 	GENERATED_BODY()
 public:
+	UPROPERTY(BlueprintCallable, BlueprintAssignable)
+	FOnAttack OnLightAttack;
+
+	UPROPERTY(BlueprintCallable, BlueprintAssignable)
+	FOnAttack OnHeavyAttack;
+
+	UPROPERTY(BlueprintCallable, BlueprintAssignable)
+	FOnAttack OnWeaponAbility;
 	/** Overriding the BeginPlay **/
 	virtual void BeginPlay() override;
 	
@@ -25,24 +33,30 @@ public:
 	virtual void LightAttack() override;
 
 	/** Light Attack Functions**/
+	UFUNCTION(BlueprintCallable)
 	void StartLightAttack();
 
+	UFUNCTION(BlueprintCallable)
 	void EndLightAttack();
 
 	/** IMplementation of Heavy Attack **/
 	virtual void HeavyAttack() override;
 
 	/** Heavy Attack Functions**/
+	UFUNCTION(BlueprintCallable)
 	void StartHeavyAttack();
 
+	UFUNCTION(BlueprintCallable)
 	void EndHeavyAttack();
 
 	/** IMplementation of Weapon Ability **/
 	virtual void WeaponAbility() override;
 
 	/** Light Attack Functions**/
+	UFUNCTION(BlueprintCallable)
 	void StartWeaponAbility();
 
+	UFUNCTION(BlueprintCallable)
 	void EndWeaponAbility();
 
 	/*UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Elemental Effect")
@@ -61,6 +75,10 @@ public:
 	/** Weapon Ability Damage **/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Configurator")
 	float WeaponAbilityDamage;
+
+	/** Attack Modifier**/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Configurator")
+	float AttackModifier;
 public:
 	UFUNCTION()
 	void OverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
@@ -69,11 +87,12 @@ public:
 	void OverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 private:
-	/*Hitboxes that this Weapon Component will Bind To */
+	/*Hit Boxes that this Weapon Component will Bind To */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	TArray<UShapeComponent*> HitBoxes;
 
 	/* Damageable Objects that have already been hit during an attack*/
+	UPROPERTY()
 	TArray<AActor*> DamagedActors;
 	
 	/*Flag to Check if Attacking*/

@@ -2,11 +2,13 @@
 
 
 #include "PlayerCharacter.h"
-
 #include "HurtBox.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Components/BoxComponent.h"
+#include "Components/CapsuleComponent.h"
+#include "Items/PickupItem.h"
+#include "Weapons/Core/MeleeComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 
 // Sets default values
@@ -29,8 +31,8 @@ APlayerCharacter::APlayerCharacter()
 	HurtBox->OnReceivedDamage.AddDynamic(this, &APlayerCharacter::ReceiveDamage);
 	HurtBox->SetupAttachment(RootComponent);
 
-	//Set Default Health
-	Health = maxHealth;
+	// Create MeleeComponent
+	MeleeComponent = CreateDefaultSubobject<UMeleeComponent>(TEXT("MeleeComponent"));
 
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -53,9 +55,16 @@ void APlayerCharacter::BeginPlay()
 	// Save Acceleration Speed set in editor
 	AccelerationSpeed = GetCharacterMovement()->MaxAcceleration;
 
+	// Bind Overlap Delegate for Pickup
+	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &APlayerCharacter::OverlapBegin);
+
+	//Set Default Health
+	Health = maxHealth;
+	
 	// Enable Character Movement and Actions
 	bCanMove = true;
 	bCanDoAction = true;
+	bCanPickup= true; 
 }
 
 void APlayerCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -97,6 +106,7 @@ void APlayerCharacter::Dash()
 	if (!bCanMove || !bCanDoAction)
 		return;
 
+
 	// Disable Character Movement and Actions
 	bCanMove = false;
 	bCanDoAction = false;
@@ -125,6 +135,9 @@ void APlayerCharacter::Dash()
 	GetCharacterMovement()->MaxAcceleration = 1000000.0f;
 	// Set Max Movement Speed to Dash Speed
 	GetCharacterMovement()->MaxWalkSpeed = DashSpeed;
+
+	//Call the Dash State Changed
+	OnDashStateChanged.Broadcast(true);
 
 	// Execute dash 
 	ExecuteDash(TargetDestination);
@@ -198,9 +211,11 @@ void APlayerCharacter::EndDash()
 	// Reset Acceleration Speed
 	GetCharacterMovement()->MaxAcceleration = AccelerationSpeed;
 	// Reset Max Movement Speed
-	GetCharacterMovement()->MaxWalkSpeed = MoveSpeed;
+	GetCharacterMovement()->MaxWalkSpeed = MoveSpeed + (MoveSpeed * ModifierSet.SpeedModifier);
 	// Slow Character to new move speed cap immediately
 	GetCharacterMovement()->Velocity = GetCharacterMovement()->Velocity.GetSafeNormal() * MoveSpeed;
+	//Call the Dash State Changed
+	OnDashStateChanged.Broadcast(false);
 }
 
 void APlayerCharacter::Interact()
@@ -209,12 +224,12 @@ void APlayerCharacter::Interact()
 
 void APlayerCharacter::LightAttack()
 {
-
+	MeleeComponent->LightAttack();
 }
 
 void APlayerCharacter::HeavyAttack()
 {
-
+	MeleeComponent->LightAttack();
 }
 
 void APlayerCharacter::Pause()
@@ -224,7 +239,8 @@ void APlayerCharacter::Pause()
 
 void APlayerCharacter::WeaponAbility()
 {
-
+	//Temporary Placeholder
+	MeleeComponent->LightAttack();
 }
 
 void APlayerCharacter::ReceiveDamage(float _InDamage/*, EEffectType _EffectType*/)
@@ -243,11 +259,38 @@ void APlayerCharacter::PlayerDeath()
 
 void APlayerCharacter::ImplementModifier(FModifierSet _InSet)
 {
+	UE_LOG(LogTemp, Warning, TEXT("Modifiers Added"));
+	bCanPickup = false;
 	ModifierSet = _InSet;
 	AddHealth(Health * _InSet.HPModifier);
+	GetCharacterMovement()->MaxWalkSpeed = MoveSpeed + (MoveSpeed * ModifierSet.SpeedModifier);
+	MeleeComponent->AttackModifier = _InSet.AttackModifier;
+	ItemEffectDelegate.BindUFunction(this, "ClearModifier");
+	GetWorld()->GetTimerManager().SetTimer(ItemEffectHandle, ItemEffectDelegate, _InSet.EffectTime, false);
+}
+
+void APlayerCharacter::ClearModifier()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Modifiers Cleared"));
+	bCanPickup = true;
+	ModifierSet = FModifierSet::ZERO();
+	GetCharacterMovement()->MaxWalkSpeed = MoveSpeed + (MoveSpeed * ModifierSet.SpeedModifier);
+	MeleeComponent->AttackModifier = 0.0f;
+	GetWorld()->GetTimerManager().ClearTimer(ItemEffectHandle);
 }
 
 void APlayerCharacter::AddHealth(float _InHealth)
 {
 	Health = FMath::Clamp(0.0f, maxHealth, Health += _InHealth);
+}
+
+void APlayerCharacter::OverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (!bCanPickup)
+		return;
+	IPickupItem* _Temp = Cast<IPickupItem>(OtherActor);
+	if (!_Temp)
+		return;
+	ImplementModifier(_Temp->GetModifiers());
+	_Temp->Pickup();
 }
