@@ -12,13 +12,13 @@
 AEnemyCharacter::AEnemyCharacter()
 {
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 
-	// Chase Trigger Sphere
-	DetectionTriggerSphere = CreateDefaultSubobject<USphereComponent>(TEXT("ChaseTriggerSphere"));
+	// Detection Trigger Sphere
+	DetectionTriggerSphere = CreateDefaultSubobject<USphereComponent>(TEXT("DetectTriggerSphere"));
 	DetectionTriggerSphere->SetupAttachment(RootComponent);
-	DetectionTriggerSphere->SetCollisionProfileName(TEXT("Trigger"));
-	DetectionTriggerSphere->OnComponentBeginOverlap.AddDynamic(this, &AEnemyCharacter::OnChaseTriggerEnter);
+	DetectionTriggerSphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	DetectionTriggerSphere->OnComponentBeginOverlap.AddDynamic(this, &AEnemyCharacter::OnDetectTriggerEnter);
 
 	// Hurt Box
 	HurtBox = CreateDefaultSubobject<UHurtBox>(TEXT("HurtBox"));
@@ -40,12 +40,13 @@ void AEnemyCharacter::BeginPlay()
 
 }
 
-void AEnemyCharacter::OnChaseTriggerEnter(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+void AEnemyCharacter::OnDetectTriggerEnter(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	// Exit if not Player Character
 	if (OtherActor != PlayerCharacter)
 		return;
+	OnDetectTriggerOverlap.Broadcast();
 }
 
 void AEnemyCharacter::OnConstruction(const FTransform& Transform)
@@ -53,7 +54,10 @@ void AEnemyCharacter::OnConstruction(const FTransform& Transform)
 	Super::OnConstruction(Transform);
 	// Set Detection Trigger Sphere Radius
 	if(DetectionTriggerSphere)
-		DetectionTriggerSphere->SetSphereRadius(ChaseRangeRadius);
+	{
+		UE_LOG( LogTemp, Warning, TEXT("Setting Detection Trigger Sphere Radius") );
+		DetectionTriggerSphere->SetSphereRadius(DetectionRangeRadius);
+	}
 }
 
 // Called every frame

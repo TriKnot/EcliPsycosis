@@ -6,6 +6,8 @@
 
 class AAIController;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDetectTriggerEnter);
+
 UCLASS()
 class ROGUELIKE_API AEnemyCharacter : public ACharacter
 {
@@ -19,7 +21,7 @@ private:
 
 	//** OnChaseTriggerEnter */
 	UFUNCTION(BlueprintCallable, Category = AI)
-	void OnChaseTriggerEnter(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
+	void OnDetectTriggerEnter(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
 		int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
 	/** Melee Component */
@@ -92,11 +94,21 @@ private:
 
 	//** Chase Range */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI, meta = (AllowPrivateAccess = "true"))
-	float ChaseRangeRadius;
+	float DetectionRangeRadius;
+
 
 public:
 	
 	/** Chase Trigger Volume */
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = AI, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI, meta = (AllowPrivateAccess = "true"))
 	class USphereComponent* DetectionTriggerSphere;
+
+	/** OnChaseTriggerEnter */
+	UPROPERTY(BlueprintAssignable, Category = AI)
+	FOnDetectTriggerEnter OnDetectTriggerOverlap;
+
+	/** AI Controller */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = AI, meta = (AllowPrivateAccess = "true"))
+	class AAIController* AIController;
+	
 };
