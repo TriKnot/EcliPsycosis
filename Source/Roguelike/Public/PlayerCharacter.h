@@ -77,29 +77,40 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	class UMeleeComponent* MeleeComponent;
 
-	/** Dash Timer Handle */
-	FTimerHandle DashTimerHandle;
+	/** Dash Timer Handles */
+	FTimerHandle DashFrameTimerHandle;
+	FTimerHandle DashEndTimerHandle;
+	FTimerHandle DashCooldownTimerHandle;
+	
+	/** Execute Dash Delegate */
+	FTimerDelegate ExecuteDashDelegate;
+
 
 	/** Move Speed -> Saved at start of play so that we can reset to default */
 	UPROPERTY()
-		float MoveSpeed;
+	float MoveSpeed;
 
 	/** Move Acceleration Speed */
 	UPROPERTY(VisibleAnywhere, Category = "Movement")
-		float AccelerationSpeed;
-
-	/**
+	float AccelerationSpeed;
+	
+	/** Dash Distance
 	 * Distance / Speed = Time
 	 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dash", meta = (AllowPrivateAccess = "true"));
 	float DashDistance = 1000.0f;
 
-	/**
+	/** Dash Speed
 	 * Distance / Speed = Time
 	 **/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dash", meta = (AllowPrivateAccess = "true"));
 	float DashSpeed = 2000.0f;
 
+	/** Dash Cooldown */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dash", meta = (AllowPrivateAccess = "true"));
+	float DashCooldown = 1.0f;
+
+	
 	//////////////////* Flags *////////////////////
 
 	/* Locking Movement */
@@ -109,6 +120,10 @@ private:
 	/* Locking Actions */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Flags", meta = (AllowPrivateAccess = "true"))
 		bool bCanDoAction;
+
+	/* Lock Dash */
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Flags", meta = (AllowPrivateAccess = "true"))
+		bool bCanDash;
 
 	/* Locking Pickup */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Flags", meta = (AllowPrivateAccess = "true"))
@@ -120,7 +135,7 @@ private:
 
 	//////////////////* Player States *////////////////////
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Modifiers", meta = (AllowPrivateAccess = "true"))
-	float maxHealth;
+	float MaxHealth;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Modifiers", meta = (AllowPrivateAccess = "true"))
 	float Health;
@@ -174,7 +189,7 @@ public:
 private:
 	/** Dash Function -> Recursively calling itself until dash is finished */
 	UFUNCTION()
-	void ExecuteDash(FVector TargetDestination);
+	void ExecuteDash(FVector TargetDestination, float DistanceTraveled);
 
 	/** Function to Receive Damage **/
 	UFUNCTION()

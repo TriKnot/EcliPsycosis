@@ -2,14 +2,16 @@
 
 
 #include "PlayerCharacter.h"
+
+#include "EnemyCharacter.h"
 #include "HurtBox.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Camera/CameraComponent.h"
-#include "Components/BoxComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Items/PickupItem.h"
 #include "Weapons/Core/MeleeComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Kismet/KismetMathLibrary.h"
 
 // Sets default values
 APlayerCharacter::APlayerCharacter()
@@ -59,20 +61,25 @@ void APlayerCharacter::BeginPlay()
 	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &APlayerCharacter::OverlapBegin);
 
 	//Set Default Health
-	Health = maxHealth;
+	Health = MaxHealth;
 	
 	// Enable Character Movement and Actions
 	bCanMove = true;
 	bCanDoAction = true;
-	bCanPickup= true; 
+	bCanPickup = true;
+	bCanDash = true;
 }
 
 void APlayerCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
 	// Clear all timers
-	if (DashTimerHandle.IsValid())
-		GetWorldTimerManager().ClearTimer(DashTimerHandle);
+	if (DashFrameTimerHandle.IsValid())
+		GetWorldTimerManager().ClearTimer(DashFrameTimerHandle);
+	if(DashEndTimerHandle.IsValid())
+		GetWorldTimerManager().ClearTimer(DashEndTimerHandle);
+	if(DashCooldownTimerHandle.IsValid())
+		GetWorldTimerManager().ClearTimer(DashCooldownTimerHandle);
 
 }
 
@@ -103,32 +110,36 @@ void APlayerCharacter::MoveRight(float _InValue)
 void APlayerCharacter::Dash()
 {
 	// Check if character can move or do actions
-	if (!bCanMove || !bCanDoAction)
+	if (!bCanDash || !bCanMove || !bCanDoAction)
+	{
+		UE_LOG( LogTemp, Warning, TEXT("Can't Dash") );
 		return;
+	}
 
 
 	// Disable Character Movement and Actions
 	bCanMove = false;
 	bCanDoAction = false;
 
-	// Calculate offset in z axis to make it go from center of hitbox
-	const FVector ZOffset = FVector(0.0f, 0.0f, HurtBox->GetScaledBoxExtent().Z);
-
 	// Calculate Target Destination
-	FVector TargetDestination = GetActorLocation() + GetActorForwardVector() * DashDistance + ZOffset;
+	FVector TargetDestination = GetActorLocation() + GetActorForwardVector() * DashDistance;
 
-	// Check if anything is blocking the dash
+	// Check if anything is blocking the dash on ground level
 	FHitResult HitResult;
 	FCollisionQueryParams CollisionParams;
 	CollisionParams.AddIgnoredActor(this);
-	GetWorld()->LineTraceSingleByChannel(HitResult, GetActorLocation() + ZOffset, TargetDestination, ECC_Visibility, CollisionParams);
-
+	GetWorld()->LineTraceSingleByChannel(HitResult, GetActorLocation(), TargetDestination, ECC_WorldStatic, CollisionParams);
+	
 	// If something is blocking the dash, set Target Destination to HitResult
-	if (HitResult.bBlockingHit)
+	if (HitResult.bBlockingHit && HitResult.GetActor() != nullptr)
 	{
-		// Set Target Destination to HitResult
-		TargetDestination = HitResult.ImpactPoint;
-		UE_LOG(LogTemp, Warning, TEXT("Hit something recalculating target destination."));
+		//Check if the hit actor is an enemy
+		if(!HitResult.GetActor()->IsA(AEnemyCharacter::StaticClass()))
+		{
+			// Set Target Destination to HitResult
+			TargetDestination = HitResult.ImpactPoint;
+			UE_LOG(LogTemp, Warning, TEXT("Hit something of class %s -> recalculating target destination."), *HitResult.GetActor()->StaticClass()->GetName());
+		}
 	}
 
 	// Uncap Movement Acceleration Speed
@@ -139,13 +150,18 @@ void APlayerCharacter::Dash()
 	//Call the Dash State Changed
 	OnDashStateChanged.Broadcast(true);
 
-	// Execute dash 
-	ExecuteDash(TargetDestination);
+	// Execute dash
+	ExecuteDashDelegate.BindUFunction(this, FName("ExecuteDash"), TargetDestination);
+	GetWorld()->GetTimerManager().SetTimerForNextTick(ExecuteDashDelegate);
+
+	// Set timer to end dash if it hasn't ended yet (in case of collision for example)
+	float DashMaxDuration = DashDistance / DashSpeed + GetWorld()->GetDeltaSeconds();
+	GetWorldTimerManager().SetTimer(DashEndTimerHandle, this, &APlayerCharacter::EndDash, DashMaxDuration, false);
 }
 
-// Maybe this should be done recursively every frame instead on a timer.
-void APlayerCharacter::ExecuteDash(FVector TargetDestination)
-{
+
+void APlayerCharacter::ExecuteDash(FVector TargetDestination, float DistanceTraveled){
+
 	// Calculate Dash Direction
 	FVector DashDirection = TargetDestination - GetActorLocation();
 	DashDirection.Normalize();
@@ -154,27 +170,19 @@ void APlayerCharacter::ExecuteDash(FVector TargetDestination)
 	// Calculate Dash Velocity
 	FVector DashTickDeltaMove = DashDirection * DashSpeed * DeltaTime;
 
-	// Check if something static is blocking the dash
+	// Move Character
 	FHitResult HitResult;
-	FCollisionQueryParams CollisionParams;
-	CollisionParams.AddIgnoredActor(this);
+	AddActorWorldOffset(DashTickDeltaMove, true, &HitResult, ETeleportType::TeleportPhysics);
 
-	// Calculate Dash Start Location (Starts at edge of hitbox in front of character)
-	FVector DashStartLocation = GetActorLocation() + GetActorForwardVector() * HurtBox->GetScaledBoxExtent().X;
-	// Calculate Dash Tick End Location
-	FVector DashTickEndLocation = DashStartLocation + DashTickDeltaMove;
-
-	// End early if something is blocking the dash
-	const bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, DashStartLocation, DashTickEndLocation, ECC_WorldStatic, CollisionParams);
-	if (bHit)
+	// Check if enemy is hit and force through any collision and do any enemy specific logic
+	if(HitResult.bBlockingHit && HitResult.GetActor() != nullptr && HitResult.GetActor()->IsA(AEnemyCharacter::StaticClass()))
 	{
-		// Add movement up to HitResult
-		AddMovementInput(HitResult.ImpactPoint - GetActorLocation());
-		// End Dash
-		EndDash();
-		return;
+		//Force the character through the enemy
+		SetActorLocation(GetActorLocation() + DashTickDeltaMove);
+		// TODO: Maybe damage here?
 	}
 
+	
 	// Check if Dash is complete and end recursion if true
 	FVector _Target = TargetDestination;
 	_Target.Z = 0;
@@ -189,15 +197,8 @@ void APlayerCharacter::ExecuteDash(FVector TargetDestination)
 		EndDash();
 		return;
 	}
-
-	// Move Character
-	AddMovementInput(DashTickDeltaMove);
-
-	// Schedule again for next frame if not complete // TODO: Make it more Efficient. Try To Remove Binding on tick 
-	FTimerDelegate DashTimerDelegate;
-	DashTimerDelegate.BindUFunction(this, FName("ExecuteDash"), TargetDestination);
-	GetWorld()->GetTimerManager().SetTimerForNextTick(DashTimerDelegate);
-
+	
+	DashFrameTimerHandle = GetWorld()->GetTimerManager().SetTimerForNextTick(ExecuteDashDelegate);	
 }
 
 void APlayerCharacter::EndDash()
@@ -206,8 +207,9 @@ void APlayerCharacter::EndDash()
 	bCanMove = true;
 	bCanDoAction = true;
 
-	// Stop Timer
-	GetWorldTimerManager().ClearTimer(DashTimerHandle);
+	// Stop Timers
+	GetWorldTimerManager().ClearTimer(DashFrameTimerHandle);
+	GetWorldTimerManager().ClearTimer(DashEndTimerHandle);
 	// Reset Acceleration Speed
 	GetCharacterMovement()->MaxAcceleration = AccelerationSpeed;
 	// Reset Max Movement Speed
@@ -216,6 +218,11 @@ void APlayerCharacter::EndDash()
 	GetCharacterMovement()->Velocity = GetCharacterMovement()->Velocity.GetSafeNormal() * MoveSpeed;
 	//Call the Dash State Changed
 	OnDashStateChanged.Broadcast(false);
+
+	// Start Dash Cooldown with lambda in timer
+	bCanDash = false;
+	GetWorld()->GetTimerManager().SetTimer(DashCooldownTimerHandle, [this]() { bCanDash = true; }, DashCooldown, false);
+	
 }
 
 void APlayerCharacter::Interact()
@@ -281,7 +288,7 @@ void APlayerCharacter::ClearModifier()
 
 void APlayerCharacter::AddHealth(float _InHealth)
 {
-	Health = FMath::Clamp(0.0f, maxHealth, Health += _InHealth);
+	Health = FMath::Clamp(0.0f, MaxHealth, Health += _InHealth);
 }
 
 void APlayerCharacter::OverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
