@@ -77,6 +77,7 @@ void AEnemyCharacter::Attack()
 void AEnemyCharacter::ReceiveDamage(float _InDamage)
 {
 	Health -= _InDamage;
+	UE_LOG(LogTemp, Error, TEXT("Enemy Health: %f"), Health);
 	if (Health <= 0.0f)
 	{
 		EnemyDeath();
@@ -85,7 +86,7 @@ void AEnemyCharacter::ReceiveDamage(float _InDamage)
 
 void AEnemyCharacter::EnemyDeath()
 {
-	UE_LOG( LogTemp, Warning, TEXT("Enemy Death") );
+	Destroy();
 }
 
 

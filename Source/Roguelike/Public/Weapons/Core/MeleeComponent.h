@@ -5,9 +5,10 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "Weapon.h"
+#include "Damage/DamageSystem.h"
 #include "MeleeComponent.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAttack);
+
 class UShapeComponent;
 
 /**
@@ -26,6 +27,9 @@ public:
 
 	UPROPERTY(BlueprintCallable, BlueprintAssignable)
 	FOnAttack OnWeaponAbility;
+
+	UPROPERTY(BlueprintCallable, BlueprintAssignable)
+	FAttackStateChanged OnAttackStateChanged;
 	/** Overriding the BeginPlay **/
 	virtual void BeginPlay() override;
 	
@@ -86,6 +90,9 @@ public:
 	UFUNCTION()
 	void OverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
+	UFUNCTION()
+	void DamageInRangeActors();
+	
 private:
 	/*Hit Boxes that this Weapon Component will Bind To */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
@@ -94,6 +101,8 @@ private:
 	/* Damageable Objects that have already been hit during an attack*/
 	UPROPERTY()
 	TArray<AActor*> DamagedActors;
+
+	TArray<IDamageSystem*> InRangeActors;
 	
 	/*Flag to Check if Attacking*/
 	bool bIsAttacking;

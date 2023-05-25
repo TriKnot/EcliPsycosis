@@ -26,6 +26,9 @@ public:
 	UPROPERTY(BlueprintAssignable, BlueprintCallable)
 	FOnDashStateChanged OnDashStateChanged;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	FName MainMenuLevel;
+
 	// Sets default values for this pawn's properties
 	APlayerCharacter();
 	virtual ~APlayerCharacter() override;
@@ -56,6 +59,13 @@ public:
 	UFUNCTION()
 	void OverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
+	/* Setter Function for Can Do Action */
+	UFUNCTION()
+	FORCEINLINE void SetterCanDoAction(bool _InBool) { bCanDoAction = !_InBool; }//TODO: We are inverting the setter, need to change that
+
+	/* Setter Function for Can Move */
+	UFUNCTION()
+	FORCEINLINE void SetterCanMove(bool _InBool) { bCanMove = _InBool; }
 private:
 	/** Top down camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
@@ -189,7 +199,7 @@ public:
 private:
 	/** Dash Function -> Recursively calling itself until dash is finished */
 	UFUNCTION()
-	void ExecuteDash(FVector TargetDestination, float DistanceTraveled);
+	void ExecuteDash(FVector TargetDestination);
 
 	/** Function to Receive Damage **/
 	UFUNCTION()

@@ -2,7 +2,7 @@
 
 
 #include "PlayerCharacter.h"
-
+#include "Kismet/GameplayStatics.h"
 #include "EnemyCharacter.h"
 #include "HurtBox.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -68,6 +68,9 @@ void APlayerCharacter::BeginPlay()
 	bCanDoAction = true;
 	bCanPickup = true;
 	bCanDash = true;
+
+	//Binding the Attack
+	MeleeComponent->OnAttackStateChanged.AddDynamic(this, &APlayerCharacter::SetterCanDoAction);
 }
 
 void APlayerCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -160,7 +163,8 @@ void APlayerCharacter::Dash()
 }
 
 
-void APlayerCharacter::ExecuteDash(FVector TargetDestination, float DistanceTraveled){
+void APlayerCharacter::ExecuteDash(FVector TargetDestination)
+{
 
 	// Calculate Dash Direction
 	FVector DashDirection = TargetDestination - GetActorLocation();
@@ -231,12 +235,14 @@ void APlayerCharacter::Interact()
 
 void APlayerCharacter::LightAttack()
 {
-	MeleeComponent->LightAttack();
+	if(bCanDoAction)
+		MeleeComponent->LightAttack();
 }
 
 void APlayerCharacter::HeavyAttack()
 {
-	MeleeComponent->LightAttack();
+	if (bCanDoAction)
+		MeleeComponent->LightAttack();//Temporary Placeholder
 }
 
 void APlayerCharacter::Pause()
@@ -246,13 +252,14 @@ void APlayerCharacter::Pause()
 
 void APlayerCharacter::WeaponAbility()
 {
-	//Temporary Placeholder
-	MeleeComponent->LightAttack();
+	if (bCanDoAction)
+		MeleeComponent->LightAttack();//Temporary Placeholder
 }
 
 void APlayerCharacter::ReceiveDamage(float _InDamage/*, EEffectType _EffectType*/)
 {
 	Health -= _InDamage;
+	UE_LOG(LogTemp, Error, TEXT("Player Health: %f"), Health);
 	if (Health <= 0.0f)
 	{
 		PlayerDeath();
@@ -261,7 +268,10 @@ void APlayerCharacter::ReceiveDamage(float _InDamage/*, EEffectType _EffectType*
 
 void APlayerCharacter::PlayerDeath()
 {
-	UE_LOG(LogTemp, Error, TEXT("Player Died"));
+	if (!MainMenuLevel.ToString().IsEmpty())
+	{
+		UGameplayStatics::OpenLevel(GetWorld(), MainMenuLevel);
+	}
 }
 
 void APlayerCharacter::ImplementModifier(FModifierSet _InSet)

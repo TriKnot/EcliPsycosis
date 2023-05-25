@@ -6,6 +6,9 @@
 #include "UObject/Interface.h"
 #include "Weapon.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAttack);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAttackStateChanged, bool, bAttackState);
+
 // This class does not need to be modified.
 UINTERFACE(MinimalAPI, meta = (CannotImplementInterfaceInBlueprint))
 class UWeapon : public UInterface
