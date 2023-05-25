@@ -23,7 +23,6 @@ void UMeleeComponent::BeginPlay()
 void UMeleeComponent::LightAttack()
 {
 	CurrentDamageValue = LightAttackDamage;
-	UE_LOG(LogTemp, Error, TEXT("Damage Amount %f"), CurrentDamageValue);
 	OnLightAttack.Broadcast();
 	OnAttackStateChanged.Broadcast(true);
 }
@@ -31,14 +30,14 @@ void UMeleeComponent::LightAttack()
 void UMeleeComponent::StartLightAttack()
 {
 	DamagedActors.Empty();
-	bIsAttacking = true;
-	DamageInRangeActors();
+	ToggleHitBox(true);
 }
 
 void UMeleeComponent::EndLightAttack()
 {
+	//DamageInRangeActors();
+	ToggleHitBox(false);
 	DamagedActors.Empty();
-	bIsAttacking = false;
 	OnAttackStateChanged.Broadcast(false);
 }
 
@@ -52,13 +51,11 @@ void UMeleeComponent::HeavyAttack()
 void UMeleeComponent::StartHeavyAttack()
 {
 	DamagedActors.Empty();
-	bIsAttacking = true;
 }
 
 void UMeleeComponent::EndHeavyAttack()
 {
 	DamagedActors.Empty();
-	bIsAttacking = false;
 	OnAttackStateChanged.Broadcast(false);
 }
 
@@ -72,15 +69,46 @@ void UMeleeComponent::WeaponAbility()
 void UMeleeComponent::StartWeaponAbility()
 {
 	DamagedActors.Empty();
-	bIsAttacking = true;
 }
 
 void UMeleeComponent::EndWeaponAbility()
 {
 	DamagedActors.Empty();
-	bIsAttacking = false;
 	OnAttackStateChanged.Broadcast(false);
 }
+
+void UMeleeComponent::ToggleHitBox(bool bIsEnabled)
+{
+	if(bIsEnabled)
+	{
+		for (const auto HitBox : HitBoxes)
+		{
+			// Enable collision for the HitBox
+			HitBox->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+
+			// Fins all the Overlapping Components
+			TArray<UPrimitiveComponent*> OverlappingComponents;
+			HitBox->GetOverlappingComponents(OverlappingComponents);
+			// Loop through all and Damage all the Overlapping Actors
+			for (UPrimitiveComponent* _component : OverlappingComponents)
+			{
+				if(_component->GetOwner() == GetOwner() || DamagedActors.Contains(_component->GetOwner()))
+					continue;
+				if(IDamageSystem* _DamageableActor = Cast<IDamageSystem>(_component))
+				{
+					_DamageableActor->TransferDamage(CurrentDamageValue + (CurrentDamageValue * AttackModifier)/*, CurrentEffectType*/);
+					DamagedActors.AddUnique(_component->GetOwner());
+				}
+			}
+		}
+	}
+	else
+	{
+		for (const auto HitBox : HitBoxes)
+			HitBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+}
+
 void UMeleeComponent::DamageInRangeActors()
 {
 	for (auto _actor : InRangeActors)
@@ -93,22 +121,20 @@ void UMeleeComponent::DamageInRangeActors()
 
 void UMeleeComponent::OverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (/*!bIsAttacking || */OtherActor == GetOwner() || DamagedActors.Contains(OtherActor))
+	if ( OtherActor == GetOwner() ||
+		DamagedActors.Contains(OtherActor))
 		return;
+	
 	IDamageSystem* _other = Cast<IDamageSystem>(OtherComp);
 	if (_other)
 	{
-		if (!bIsAttacking)
-		{
-			InRangeActors.AddUnique(_other);
-			return;
-		}
-		else
-		{
-			UE_LOG(LogTemp, Error, TEXT("UMeleeComponent::OverlapBegin"));
-			_other->TransferDamage(CurrentDamageValue + (CurrentDamageValue * AttackModifier)/*, CurrentEffectType*/);
-			DamagedActors.Add(OtherActor);
-		}
+		_other->TransferDamage(CurrentDamageValue + (CurrentDamageValue * AttackModifier)/*, CurrentEffectType*/);
+		DamagedActors.AddUnique(OtherActor);
+		// {
+		// 	UE_LOG(LogTemp, Error, TEXT("UMeleeComponent::OverlapBegin"));
+		// 	_other->TransferDamage(CurrentDamageValue + (CurrentDamageValue * AttackModifier)/*, CurrentEffectType*/);
+		// 	DamagedActors.Add(OtherActor);
+		// }
 	}
 	
 }

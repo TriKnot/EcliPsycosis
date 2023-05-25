@@ -22,6 +22,7 @@ AEnemyCharacter::AEnemyCharacter()
 
 	// Hurt Box
 	HurtBox = CreateDefaultSubobject<UHurtBox>(TEXT("HurtBox"));
+	HurtBox->OnReceivedDamage.AddDynamic(this, &AEnemyCharacter::ReceiveDamage);
 	HurtBox->SetupAttachment(RootComponent);
 
 	// Melee Component
@@ -37,6 +38,10 @@ void AEnemyCharacter::BeginPlay()
 
 	// Cache Player Character
 	PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetPawn());
+
+	//Set Default Health
+	Health = MaxHealth;
+
 
 }
 
@@ -55,7 +60,6 @@ void AEnemyCharacter::OnConstruction(const FTransform& Transform)
 	// Set Detection Trigger Sphere Radius
 	if(DetectionTriggerSphere)
 	{
-		UE_LOG( LogTemp, Warning, TEXT("Setting Detection Trigger Sphere Radius") );
 		DetectionTriggerSphere->SetSphereRadius(DetectionRangeRadius);
 	}
 }
@@ -71,13 +75,12 @@ void AEnemyCharacter::Attack()
 {
 	// Initialize attack here
 	MeleeComponent->LightAttack();
-	UE_LOG(LogTemp, Error, TEXT("Attacking"));
 }
 
 void AEnemyCharacter::ReceiveDamage(float _InDamage)
 {
-	Health -= _InDamage;
-	UE_LOG(LogTemp, Error, TEXT("Enemy Health: %f"), Health);
+	AddHealth(-_InDamage);
+	//UE_LOG(LogTemp, Error, TEXT("Enemy Health: %f"), Health);
 	if (Health <= 0.0f)
 	{
 		EnemyDeath();
@@ -86,7 +89,16 @@ void AEnemyCharacter::ReceiveDamage(float _InDamage)
 
 void AEnemyCharacter::EnemyDeath()
 {
-	Destroy();
+	// Destroy this actor
+	GetWorld()->DestroyActor(this);
 }
 
-
+void AEnemyCharacter::AddHealth(float _InHealth)
+{
+	Health = FMath::Clamp(Health += _InHealth, 0.0f, MaxHealth);
+	if(GEngine)
+	{
+		const FString Text = FString::Printf(TEXT("Changing %s health by %f to %f"), *GetName(), _InHealth, Health);
+		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, Text);
+	}
+}

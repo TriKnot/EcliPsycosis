@@ -52,6 +52,10 @@ public:
 	UFUNCTION()
 	void EnemyDeath();
 
+	/** adds both Negative and Positive Health While Clamping it to the Min and Max**/
+	void AddHealth(float _InHealth);
+
+
 private:
 
 	//** Player Character */
@@ -64,8 +68,12 @@ private:
 
 	//////////////////* Stats *////////////////////
 
-	//** Health */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI, meta = (AllowPrivateAccess = "true"))
+	/** Max Health */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = AI, meta = (AllowPrivateAccess = "true"))
+	float MaxHealth;
+	
+	//** Current Health */
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = AI, meta = (AllowPrivateAccess = "true"))
 	float Health;
 
 	//** Defense */

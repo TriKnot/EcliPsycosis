@@ -63,6 +63,10 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void EndWeaponAbility();
 
+	/** Toggle Hitbox on and off */
+	UFUNCTION(BlueprintCallable)
+	void ToggleHitBox(bool bIsEnabled);
+	
 	/*UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Elemental Effect")
 	EEffectType CurrentEffectType;*/
 
@@ -83,6 +87,7 @@ public:
 	/** Attack Modifier**/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Configurator")
 	float AttackModifier;
+	
 public:
 	UFUNCTION()
 	void OverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
@@ -103,9 +108,6 @@ private:
 	TArray<AActor*> DamagedActors;
 
 	TArray<IDamageSystem*> InRangeActors;
-	
-	/*Flag to Check if Attacking*/
-	bool bIsAttacking;
 
 	/*Current Damage value*/
 	float CurrentDamageValue;
