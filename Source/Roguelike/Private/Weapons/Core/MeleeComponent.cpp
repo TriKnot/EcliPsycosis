@@ -2,6 +2,9 @@
 
 
 #include "Weapons/Core/MeleeComponent.h"
+
+#include "EnemyCharacter.h"
+#include "PlayerCharacter.h"
 #include "Components/ShapeComponent.h"
 
 void UMeleeComponent::BeginPlay()
@@ -17,6 +20,7 @@ void UMeleeComponent::BeginPlay()
 		HitBox->OnComponentBeginOverlap.AddDynamic(this, &UMeleeComponent::OverlapBegin);
 		HitBox->OnComponentEndOverlap.AddDynamic(this, &UMeleeComponent::OverlapEnd);
 	}
+	ToggleHitBox(false);
 }
 
 
@@ -90,16 +94,14 @@ void UMeleeComponent::ToggleHitBox(bool bIsEnabled)
 			TArray<UPrimitiveComponent*> OverlappingComponents;
 			HitBox->GetOverlappingComponents(OverlappingComponents);
 			// Loop through all and Damage all the Overlapping Actors
-			for (UPrimitiveComponent* _component : OverlappingComponents)
+			for (UPrimitiveComponent* Component : OverlappingComponents)
 			{
-				if(_component->GetOwner() == GetOwner() || DamagedActors.Contains(_component->GetOwner()))
-					continue;
-				if(IDamageSystem* _DamageableActor = Cast<IDamageSystem>(_component))
+				IDamageSystem* DamageSystem;
+				if(TryGetDamageSystem(Component, DamageSystem))
 				{
-					_DamageableActor->TransferDamage(CurrentDamageValue + (CurrentDamageValue * AttackModifier)/*, CurrentEffectType*/);
-					DamagedActors.AddUnique(_component->GetOwner());
-				}
-			}
+					DamageSystem->TransferDamage(CurrentDamageValue + (CurrentDamageValue * AttackModifier)/*, CurrentEffectType*/);
+					DamagedActors.AddUnique(Component->GetOwner());
+				}			}
 		}
 	}
 	else
@@ -119,22 +121,40 @@ void UMeleeComponent::DamageInRangeActors()
 	InRangeActors.Empty();
 }
 
+bool UMeleeComponent::TryGetDamageSystem(UPrimitiveComponent* OtherComponent, IDamageSystem*& OutDamageSystem) const
+{
+	AActor* OtherActor = OtherComponent->GetOwner();
+	
+	if ( OtherActor == GetOwner() || DamagedActors.Contains(OtherActor))
+		return false;
+
+
+	if (CanDamageTypes == ECanDamageTypes::CDT_Player)
+	{
+		if (!OtherActor->IsA(APlayerCharacter::StaticClass()))
+			return false;
+	}
+	else if (CanDamageTypes == ECanDamageTypes::CDT_Enemy)
+	{
+		if (!OtherActor->IsA(AEnemyCharacter::StaticClass()))
+			return false;
+	}
+	
+	OutDamageSystem = Cast<IDamageSystem>(OtherComponent);
+	if(!OutDamageSystem)
+		return false;
+
+	
+	return true;
+}
+
 void UMeleeComponent::OverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if ( OtherActor == GetOwner() ||
-		DamagedActors.Contains(OtherActor))
-		return;
-	
-	IDamageSystem* _other = Cast<IDamageSystem>(OtherComp);
-	if (_other)
+	IDamageSystem* DamageSystem;
+	if(TryGetDamageSystem(OtherComp, DamageSystem))
 	{
-		_other->TransferDamage(CurrentDamageValue + (CurrentDamageValue * AttackModifier)/*, CurrentEffectType*/);
+		DamageSystem->TransferDamage(CurrentDamageValue + (CurrentDamageValue * AttackModifier)/*, CurrentEffectType*/);
 		DamagedActors.AddUnique(OtherActor);
-		// {
-		// 	UE_LOG(LogTemp, Error, TEXT("UMeleeComponent::OverlapBegin"));
-		// 	_other->TransferDamage(CurrentDamageValue + (CurrentDamageValue * AttackModifier)/*, CurrentEffectType*/);
-		// 	DamagedActors.Add(OtherActor);
-		// }
 	}
 	
 }

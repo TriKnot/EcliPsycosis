@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include <optional>
+
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "Weapon.h"
@@ -10,6 +12,14 @@
 
 
 class UShapeComponent;
+
+UENUM()
+enum class ECanDamageTypes : uint8
+{
+	CDT_Player,
+	CDT_Enemy,
+	CDT_Everything
+};
 
 /**
  * Base Class for the Melee Weapon. 
@@ -87,6 +97,10 @@ public:
 	/** Attack Modifier**/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Configurator")
 	float AttackModifier;
+
+	/** Types that this component can attack and damage */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Configurator")
+	ECanDamageTypes CanDamageTypes;
 	
 public:
 	UFUNCTION()
@@ -112,5 +126,9 @@ private:
 	/*Current Damage value*/
 	float CurrentDamageValue;
 
+private:
+	// Returns true if the actor is a valid target for this component
+	// If true, OutDamageSystem will be set to the damage system of the actor
+	bool TryGetDamageSystem(UPrimitiveComponent* OtherComponent, IDamageSystem*& OutDamageSystem) const;
 	
 };
