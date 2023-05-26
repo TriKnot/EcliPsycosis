@@ -3,7 +3,9 @@
 #include "AIController.h"
 #include "HurtBox.h"
 #include "PlayerCharacter.h"
+#include "Components/CapsuleComponent.h"
 #include "Components/SphereComponent.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "Weapons/Core/MeleeComponent.h"
 
@@ -16,7 +18,8 @@ AEnemyCharacter::AEnemyCharacter()
 
 	// Detection Trigger Sphere
 	DetectionTriggerSphere = CreateDefaultSubobject<USphereComponent>(TEXT("DetectTriggerSphere"));
-	DetectionTriggerSphere->SetupAttachment(RootComponent);
+	DetectionTriggerSphere->SetupAttachment(GetMesh());
+	DetectionTriggerSphere->InitSphereRadius(1500.f);
 	DetectionTriggerSphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	DetectionTriggerSphere->OnComponentBeginOverlap.AddDynamic(this, &AEnemyCharacter::OnDetectTriggerEnter);
 
@@ -41,7 +44,6 @@ void AEnemyCharacter::BeginPlay()
 
 	//Set Default Health
 	Health = MaxHealth;
-
 
 }
 
@@ -80,7 +82,6 @@ void AEnemyCharacter::Attack()
 void AEnemyCharacter::ReceiveDamage(float _InDamage)
 {
 	AddHealth(-_InDamage);
-	//UE_LOG(LogTemp, Error, TEXT("Enemy Health: %f"), Health);
 	if (Health <= 0.0f)
 	{
 		EnemyDeath();
@@ -101,4 +102,21 @@ void AEnemyCharacter::AddHealth(float _InHealth)
 		const FString Text = FString::Printf(TEXT("Changing %s health by %f to %f"), *GetName(), _InHealth, Health);
 		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, Text);
 	}
+}
+
+void AEnemyCharacter::RotateToTarget(AActor* TargetActor)
+{
+	// Exit if no target
+	if (!TargetActor)
+		return;
+
+	// Get Location of Target
+	const FVector TargetLocation = TargetActor->GetActorLocation();
+
+	// Find Look at Rotation
+	const FRotator LookAtRotation = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), TargetLocation);
+
+	// Set Actor Rotation
+	SetActorRotation(LookAtRotation);
+	
 }

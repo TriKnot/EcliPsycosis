@@ -4,6 +4,7 @@
 #include "GameFramework/Character.h"
 #include "EnemyCharacter.generated.h"
 
+class APlayerCharacter;
 class AAIController;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDetectTriggerEnter);
@@ -55,6 +56,13 @@ public:
 	/** adds both Negative and Positive Health While Clamping it to the Min and Max**/
 	void AddHealth(float _InHealth);
 
+	/** Rotate Character to Target */
+	UFUNCTION(BlueprintCallable, Category = AI)
+	void RotateToTarget(AActor* TargetActor);
+
+	/** */
+	UFUNCTION(BlueprintCallable, Category = AI)
+	APlayerCharacter* GetPlayerCharacter() const { return PlayerCharacter; }
 
 private:
 
@@ -102,21 +110,17 @@ private:
 
 	//** Chase Range */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI, meta = (AllowPrivateAccess = "true"))
-	float DetectionRangeRadius;
-
+	float DetectionRangeRadius = 100.0f;
 
 public:
 	
 	/** Chase Trigger Volume */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = AI, meta = (AllowPrivateAccess = "true"))
 	class USphereComponent* DetectionTriggerSphere;
 
 	/** OnChaseTriggerEnter */
 	UPROPERTY(BlueprintAssignable, Category = AI)
 	FOnDetectTriggerEnter OnDetectTriggerOverlap;
 
-	/** AI Controller */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = AI, meta = (AllowPrivateAccess = "true"))
-	class AAIController* AIController;
 	
 };
