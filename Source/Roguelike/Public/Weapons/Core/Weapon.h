@@ -36,4 +36,16 @@ public:
 	/** Abstract Function for Weapon Ability **/
 	UFUNCTION(BlueprintCallable, Category = "Weapon Interface")
 	virtual void WeaponAbility();
+
+	/** Abstract Function to Start Generic Attack State **/
+	UFUNCTION(BlueprintCallable, Category = "Weapon Interface")
+	virtual void StartAttack();
+
+	/** Abstract Fucntion to Stop generic Attack State **/
+	UFUNCTION(BlueprintCallable, Category = "Weapon Interface")
+	virtual void StopAttack();
+
+	/** Abstract Function to Clear Generic Attack States **/
+	UFUNCTION(BlueprintCallable, Category = "Weapon Interface")
+	virtual void ClearAttack();
 };

@@ -30,12 +30,14 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+		TSubclassOf<UUserWidget> PauseMenuClass;
 private:
 
 	/*Overriding Function That Gets Called When the Controller possesses the Player*/
 	virtual void BeginPlayingState() override;
 
-	/*Overriding Input Bindings*/\
+	/*Overriding Input Bindings*/
 	virtual void SetupInputComponent() override;
 
 	/*Function to Bind on the MoveForward Input*/
@@ -72,4 +74,7 @@ private:
 
 private:
 	APlayerCharacter* CurrentPawn;
+	UUserWidget* PauseMenu;
+
+	
 };

@@ -12,3 +12,12 @@ void IWeapon::HeavyAttack()
 
 void IWeapon::WeaponAbility()
 {}
+
+void IWeapon::StartAttack()
+{}
+
+void IWeapon::StopAttack()
+{}
+
+void IWeapon::ClearAttack()
+{}

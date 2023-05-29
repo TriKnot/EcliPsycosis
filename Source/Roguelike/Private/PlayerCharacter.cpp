@@ -207,8 +207,8 @@ void APlayerCharacter::ExecuteDash(FVector TargetDestination)
 void APlayerCharacter::EndDash()
 {
 	// Unlock Character Movement and Actions
-	bCanMove = true;
-	bCanDoAction = true;
+	/*bCanMove = true;
+	bCanDoAction = true;*/
 
 	// Stop Timers
 	GetWorldTimerManager().ClearTimer(DashFrameTimerHandle);

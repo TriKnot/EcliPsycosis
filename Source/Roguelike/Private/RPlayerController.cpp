@@ -3,6 +3,8 @@
 
 #include "RPlayerController.h"
 #include "PlayerCharacter.h"
+#include "Kismet/GameplayStatics.h"
+#include "Blueprint/UserWidget.h"
 
 ARPlayerController::ARPlayerController()
 {
@@ -32,7 +34,7 @@ void ARPlayerController::SetupInputComponent()
 	InputComponent->BindAction("LightAttack", IE_Pressed, this, &ARPlayerController::LightAttack);
 	InputComponent->BindAction("HeavyAttack", IE_Pressed, this, &ARPlayerController::HeavyAttack);
 	InputComponent->BindAction("WeaponAbility", IE_Pressed, this, &ARPlayerController::WeaponAbility);
-	InputComponent->BindAction("Pause", IE_Pressed, this, &ARPlayerController::PlayerPause);
+	InputComponent->BindAction("Pause", IE_Pressed, this, &ARPlayerController::PlayerPause).bExecuteWhenPaused = true;
 }
 
 void ARPlayerController::MoveForward(float _InVal)
@@ -74,7 +76,20 @@ void ARPlayerController::HeavyAttack()
 
 void ARPlayerController::PlayerPause()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Paused"));
+	bool NewPauseState = !UGameplayStatics::IsGamePaused(GetWorld());
+	UGameplayStatics::SetGamePaused(GetWorld(), NewPauseState);
+	if (NewPauseState)
+	{
+		PauseMenu = CreateWidget<UUserWidget>(this, PauseMenuClass, TEXT("PauseMenu"));
+		PauseMenu->AddToViewport(5);
+	}
+	else
+	{
+		if (PauseMenu)
+		{
+			PauseMenu->RemoveFromParent();
+		}
+	}
 }
 
 void ARPlayerController::WeaponAbility()

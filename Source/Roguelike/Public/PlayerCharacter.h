@@ -66,6 +66,8 @@ public:
 	/* Setter Function for Can Move */
 	UFUNCTION()
 	FORCEINLINE void SetterCanMove(bool _InBool) { bCanMove = _InBool; }
+
+
 private:
 	/** Top down camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))

@@ -23,6 +23,22 @@ void UMeleeComponent::BeginPlay()
 	ToggleHitBox(false);
 }
 
+void UMeleeComponent::StartAttack()
+{
+	DamagedActors.Empty();
+	ToggleHitBox(true);
+}
+
+void UMeleeComponent::StopAttack()
+{
+	DamagedActors.Empty();
+	ToggleHitBox(false);
+}
+
+void UMeleeComponent::ClearAttack()
+{
+	OnAttackStateChanged.Broadcast(false);
+}
 
 void UMeleeComponent::LightAttack()
 {
@@ -31,19 +47,7 @@ void UMeleeComponent::LightAttack()
 	OnAttackStateChanged.Broadcast(true);
 }
 
-void UMeleeComponent::StartLightAttack()
-{
-	DamagedActors.Empty();
-	ToggleHitBox(true);
-}
 
-void UMeleeComponent::EndLightAttack()
-{
-	//DamageInRangeActors();
-	ToggleHitBox(false);
-	DamagedActors.Empty();
-	OnAttackStateChanged.Broadcast(false);
-}
 
 void UMeleeComponent::HeavyAttack()
 {
@@ -52,16 +56,7 @@ void UMeleeComponent::HeavyAttack()
 	OnAttackStateChanged.Broadcast(true);
 }
 
-void UMeleeComponent::StartHeavyAttack()
-{
-	DamagedActors.Empty();
-}
 
-void UMeleeComponent::EndHeavyAttack()
-{
-	DamagedActors.Empty();
-	OnAttackStateChanged.Broadcast(false);
-}
 
 void UMeleeComponent::WeaponAbility()
 {
@@ -70,16 +65,7 @@ void UMeleeComponent::WeaponAbility()
 	OnAttackStateChanged.Broadcast(true);
 }
 
-void UMeleeComponent::StartWeaponAbility()
-{
-	DamagedActors.Empty();
-}
 
-void UMeleeComponent::EndWeaponAbility()
-{
-	DamagedActors.Empty();
-	OnAttackStateChanged.Broadcast(false);
-}
 
 void UMeleeComponent::ToggleHitBox(bool bIsEnabled)
 {
@@ -166,3 +152,39 @@ void UMeleeComponent::OverlapEnd(UPrimitiveComponent* OverlappedComponent, AActo
 		InRangeActors.Remove(_other);
 	}
 }
+
+//void UMeleeComponent::StartLightAttack()
+//{
+//	DamagedActors.Empty();
+//	ToggleHitBox(true);
+//}
+//
+//void UMeleeComponent::EndLightAttack()
+//{
+//	//DamageInRangeActors();
+//	ToggleHitBox(false);
+//	DamagedActors.Empty();
+//	OnAttackStateChanged.Broadcast(false);
+//}
+
+//void UMeleeComponent::StartHeavyAttack()
+//{
+//	DamagedActors.Empty();
+//}
+//
+//void UMeleeComponent::EndHeavyAttack()
+//{
+//	DamagedActors.Empty();
+//	OnAttackStateChanged.Broadcast(false);
+//}
+
+//void UMeleeComponent::StartWeaponAbility()
+//{
+//	DamagedActors.Empty();
+//}
+//
+//void UMeleeComponent::EndWeaponAbility()
+//{
+//	DamagedActors.Empty();
+//	OnAttackStateChanged.Broadcast(false);
+//}

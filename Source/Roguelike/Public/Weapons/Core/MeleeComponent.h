@@ -13,7 +13,7 @@
 
 class UShapeComponent;
 
-UENUM()
+UENUM(BlueprintType)
 enum class ECanDamageTypes : uint8
 {
 	CDT_Player,
@@ -42,36 +42,26 @@ public:
 	FAttackStateChanged OnAttackStateChanged;
 	/** Overriding the BeginPlay **/
 	virtual void BeginPlay() override;
-	
+
+	/** Functions to Start and Stop Attack State **/
+
+	UFUNCTION()
+	virtual void StartAttack() override;
+
+	UFUNCTION()
+	virtual void StopAttack() override;
+
+	UFUNCTION()
+	virtual void ClearAttack() override;
+
 	/** Implementation of Light Attack **/
 	virtual void LightAttack() override;
-
-	/** Light Attack Functions**/
-	UFUNCTION(BlueprintCallable)
-	void StartLightAttack();
-
-	UFUNCTION(BlueprintCallable)
-	void EndLightAttack();
-
+	
 	/** IMplementation of Heavy Attack **/
 	virtual void HeavyAttack() override;
 
-	/** Heavy Attack Functions**/
-	UFUNCTION(BlueprintCallable)
-	void StartHeavyAttack();
-
-	UFUNCTION(BlueprintCallable)
-	void EndHeavyAttack();
-
 	/** IMplementation of Weapon Ability **/
 	virtual void WeaponAbility() override;
-
-	/** Light Attack Functions**/
-	UFUNCTION(BlueprintCallable)
-	void StartWeaponAbility();
-
-	UFUNCTION(BlueprintCallable)
-	void EndWeaponAbility();
 
 	/** Toggle Hitbox on and off */
 	UFUNCTION(BlueprintCallable)
@@ -132,3 +122,24 @@ private:
 	bool TryGetDamageSystem(UPrimitiveComponent* OtherComponent, IDamageSystem*& OutDamageSystem) const;
 	
 };
+
+///** Light Attack Functions**/
+	//UFUNCTION(BlueprintCallable)
+	//void StartLightAttack();
+
+	//UFUNCTION(BlueprintCallable)
+	//void EndLightAttack();
+
+///** Heavy Attack Functions**/
+	//UFUNCTION(BlueprintCallable)
+	//void StartHeavyAttack();
+
+	//UFUNCTION(BlueprintCallable)
+	//void EndHeavyAttack();
+
+	///** Light Attack Functions**/
+	//UFUNCTION(BlueprintCallable)
+	//void StartWeaponAbility();
+
+	//UFUNCTION(BlueprintCallable)
+	//void EndWeaponAbility();
