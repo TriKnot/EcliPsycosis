@@ -1,0 +1,105 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "Weapon.h"
+#include "Components/ActorComponent.h"
+#include "RangedComponent.generated.h"
+
+class AProjectile;
+
+/**
+ * Base Class for the Ranged Weapon. 
+ */
+UCLASS( Blueprintable )
+class ROGUELIKE_API URangedComponent : public UActorComponent, public IWeapon
+{
+	GENERATED_BODY()
+
+public:	
+	UPROPERTY(BlueprintCallable, BlueprintAssignable)
+	FOnAttack OnLightAttack;
+
+	UPROPERTY(BlueprintCallable, BlueprintAssignable)
+	FOnAttack OnHeavyAttack;
+
+	UPROPERTY(BlueprintCallable, BlueprintAssignable)
+	FOnAttack OnWeaponAbility;
+
+	UPROPERTY(BlueprintCallable, BlueprintAssignable)
+	FAttackStateChanged OnAttackStateChanged;
+
+protected:
+	// Called when the game starts
+	virtual void BeginPlay() override;
+
+public:
+	/** Functions to Start and Stop Attack State **/
+	
+	UFUNCTION()
+	virtual void StartAttack() override;
+
+	UFUNCTION()
+	virtual void StopAttack() override;
+
+	UFUNCTION()
+	virtual void ClearAttack() override;
+
+	/** Implementation of Light Attack **/
+	virtual void LightAttack() override;
+	
+	/** Implementation of Heavy Attack **/
+	virtual void HeavyAttack() override;
+
+	/** Implementation of Weapon Ability **/
+	virtual void WeaponAbility() override;
+
+
+	FORCEINLINE void SetTarget(AActor* _Target) { Target = _Target; };
+
+	FORCEINLINE void SetFirePoint(USceneComponent* _FirePoint) { FirePoint = _FirePoint; };
+	
+	/** Configurator Variables **/
+
+	/** Light Attack Damage **/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Configurator")
+	float LightAttackDamage;
+
+	/** Heavy Attack Damage **/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Configurator")
+	float HeavyAttackDamage;
+
+	/** Weapon Ability Damage **/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Configurator")
+	float WeaponAbilityDamage;
+
+	/** Attack Modifier**/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Configurator")
+	float AttackModifier;
+
+	/** Types that this component can attack and damage */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Configurator")
+	TEnumAsByte< ECanDamageTypes::Type > CanDamageTypes;
+
+private:
+
+	void SpawnProjectile(TSubclassOf<AProjectile> ProjectileClass ) const;
+	
+	/** Projectile Class to Spawn **/
+	UPROPERTY(EditAnywhere, Category = "Configurator")
+	TSubclassOf<AProjectile> LightProjectileClass;
+	
+	UPROPERTY(EditAnywhere, Category = "Configurator")
+	TSubclassOf<AProjectile> HeavyProjectileClass;
+	
+	UPROPERTY(EditAnywhere, Category = "Configurator")
+	TSubclassOf<AProjectile> AbilityProjectileClass;
+	
+	UPROPERTY(VisibleAnywhere)
+	AActor* Target;
+
+	UPROPERTY(VisibleAnywhere)
+	USceneComponent* FirePoint;
+	
+};

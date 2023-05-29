@@ -13,14 +13,6 @@
 
 class UShapeComponent;
 
-UENUM(BlueprintType)
-enum class ECanDamageTypes : uint8
-{
-	CDT_Player,
-	CDT_Enemy,
-	CDT_Everything
-};
-
 /**
  * Base Class for the Melee Weapon. 
  */
@@ -90,7 +82,7 @@ public:
 
 	/** Types that this component can attack and damage */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Configurator")
-	ECanDamageTypes CanDamageTypes;
+	TEnumAsByte< ECanDamageTypes::Type > CanDamageTypes;
 	
 public:
 	UFUNCTION()

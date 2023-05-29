@@ -9,6 +9,17 @@
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAttack);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAttackStateChanged, bool, bAttackState);
 
+UENUM(BlueprintType)
+namespace ECanDamageTypes 
+{
+	enum Type
+	{
+		CDT_Player			UMETA( DisplayName = "Player" ),
+		CDT_Enemy 			UMETA( DisplayName = "Enemy" ),
+		CDT_Everything 		UMETA( DisplayName = "Everything" )
+	};
+}
+
 // This class does not need to be modified.
 UINTERFACE(MinimalAPI, meta = (CannotImplementInterfaceInBlueprint))
 class UWeapon : public UInterface
@@ -41,7 +52,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Weapon Interface")
 	virtual void StartAttack();
 
-	/** Abstract Fucntion to Stop generic Attack State **/
+	/** Abstract Function to Stop generic Attack State **/
 	UFUNCTION(BlueprintCallable, Category = "Weapon Interface")
 	virtual void StopAttack();
 
