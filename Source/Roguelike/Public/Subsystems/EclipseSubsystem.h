@@ -30,6 +30,7 @@ public:
 		FORCEINLINE void SetCycleTime(float _NewCycleTime) { EclipseCycleTime = _NewCycleTime; }
 	UFUNCTION()
 		void ToggleNatureState();
+	virtual TStatId GetStatId() const override {return TStatId();};
 
 private:
 	UPROPERTY(VisibleAnywhere, meta = (AllowPrivateAccess = "true"))
