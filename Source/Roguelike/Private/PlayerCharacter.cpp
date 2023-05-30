@@ -241,7 +241,7 @@ void APlayerCharacter::LightAttack()
 void APlayerCharacter::HeavyAttack()
 {
 	if (bCanDoAction)
-		MeleeComponent->LightAttack();//Temporary Placeholder
+		MeleeComponent->HeavyAttack();
 }
 
 void APlayerCharacter::Pause()
@@ -252,7 +252,7 @@ void APlayerCharacter::Pause()
 void APlayerCharacter::WeaponAbility()
 {
 	if (bCanDoAction)
-		MeleeComponent->LightAttack();//Temporary Placeholder
+		MeleeComponent->WeaponAbility();
 }
 
 void APlayerCharacter::ReceiveDamage(float _InDamage/*, EEffectType _EffectType*/)

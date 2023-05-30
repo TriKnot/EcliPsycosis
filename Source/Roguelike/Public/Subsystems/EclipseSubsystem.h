@@ -18,6 +18,10 @@ class ROGUELIKE_API UEclipseSubsystem : public UTickableWorldSubsystem
 
 
 public:
+	UEclipseSubsystem();
+
+	virtual void Tick(float DeltaTime) override;
+
 	UPROPERTY(BlueprintAssignable)
 		FOnNatureStateChanged OnNatureStateChanged;
 	UFUNCTION(BlueprintCallable, Category = "EclipseSubSystem")
@@ -25,11 +29,17 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "EclipseSubSystem")
 		FORCEINLINE void SetCurrentState(ENatureState _NewState) { CurrentNatureState = _NewState; }
 	UFUNCTION(BlueprintCallable, Category = "EclipseSubSystem")
-		FORCEINLINE float GetCycleTime() const { return EclipseCycleTime; }
+		FORCEINLINE float GetEclipseTime() const { return EclipseCycleTime; }
 	UFUNCTION(BlueprintCallable, Category = "EclipseSubSystem")
-		FORCEINLINE void SetCycleTime(float _NewCycleTime) { EclipseCycleTime = _NewCycleTime; }
+		FORCEINLINE void SetEclipseTime(float _NewCycleTime) { EclipseCycleTime = _NewCycleTime; }
+	UFUNCTION(BlueprintCallable, Category = "EclipseSubSystem")
+		FORCEINLINE float GetDayTime() const { return DayCycleTime; }
+	UFUNCTION(BlueprintCallable, Category = "EclipseSubSystem")
+		FORCEINLINE void SetDayTime(float _NewCycleTime) { DayCycleTime = _NewCycleTime; }
 	UFUNCTION()
 		void ToggleNatureState();
+	UFUNCTION(BlueprintCallable)
+		void StartRunning();
 	virtual TStatId GetStatId() const override {return TStatId();};
 
 private:
@@ -38,5 +48,11 @@ private:
 
 	UPROPERTY(VisibleAnywhere, meta = (AllowPrivateAccess = "true"))
 	float EclipseCycleTime;
+
+	UPROPERTY(VisibleAnywhere, meta = (AllowPrivateAccess = "true"))
+	float DayCycleTime;
+
+	bool bRunning;
+	float Accumulator;
 	
 };
