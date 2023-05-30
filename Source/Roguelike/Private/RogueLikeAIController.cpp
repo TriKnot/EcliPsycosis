@@ -23,7 +23,7 @@ void ARogueLikeAIController::BeginPlay()
 	// Hook up to EclipseSubsystem to be notified of Eclipse Phase
 	UEclipseSubsystem* EclipseSubsystem = GetWorld()->GetSubsystem<UEclipseSubsystem>();
 	if (EclipseSubsystem)
-		EclipseSubsystem->OnNatureStateChanged.AddDynamic(this, &ARogueLikeAIController::UpdateEcpliseState);
+		EclipseSubsystem->OnNatureStateChanged.AddDynamic(this, &ARogueLikeAIController::UpdateEclipseState);
 	UBehaviorTree* BehaviorTree = EclipseSubsystem->GetCurrentState() == ENatureState::Sun ? SunPhaseBehaviorTree : EclipsePhaseBehaviorTree;
 	SetBehaviorTree(BehaviorTree);
 
@@ -101,7 +101,7 @@ void ARogueLikeAIController::SetDefaultBlackboardValues() const
 	Blackboard->SetValueAsObject("PlayerReference", PlayerCharacter);
 }
 
-void ARogueLikeAIController::UpdateEcpliseState(ENatureState _NewState) 
+void ARogueLikeAIController::UpdateEclipseState(ENatureState _NewState) 
 {
 	if(_NewState == ENatureState::Eclipse)
 	{

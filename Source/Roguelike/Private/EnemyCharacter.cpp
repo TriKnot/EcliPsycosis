@@ -8,6 +8,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "Weapons/Core/MeleeComponent.h"
+#include "Weapons/Core/RangedComponent.h"
 
 
 // Sets default values
@@ -30,6 +31,9 @@ AEnemyCharacter::AEnemyCharacter()
 
 	// Melee Component
 	MeleeComponent = CreateDefaultSubobject<UMeleeComponent>(TEXT("MeleeComponent"));
+
+	// Ranged Component
+	RangedComponent = CreateDefaultSubobject<URangedComponent>(TEXT("RangedComponent"));
 
 }
 

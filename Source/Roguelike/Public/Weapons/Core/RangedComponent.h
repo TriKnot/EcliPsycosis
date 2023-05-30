@@ -62,6 +62,10 @@ public:
 	
 	/** Configurator Variables **/
 
+	/** Flag to set if component is enabled */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Configurator")
+	bool bIsEnabled = false;
+
 	/** Light Attack Damage **/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Configurator")
 	float LightAttackDamage;

@@ -25,7 +25,8 @@ public:
 	void SetBehaviorTree(UBehaviorTree* _InBehaviorTree);
 	void SetDefaultBlackboardValues() const;
 
-	void UpdateEcpliseState(ENatureState _NewState);
+	UFUNCTION()
+	void UpdateEclipseState(ENatureState _NewState);
 
 	/** Sets player detected key to true */
 	UFUNCTION()

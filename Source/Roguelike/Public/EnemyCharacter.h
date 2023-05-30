@@ -29,6 +29,10 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	class UMeleeComponent* MeleeComponent;
 
+	/** Ranged Component */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	class URangedComponent* RangedComponent;
+	
 protected:
 	// Called when an instance of this is placed or spawned
 	virtual void OnConstruction(const FTransform& Transform) override;

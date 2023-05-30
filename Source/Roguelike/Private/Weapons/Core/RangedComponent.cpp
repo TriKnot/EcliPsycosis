@@ -9,9 +9,13 @@
 void URangedComponent::BeginPlay()
 {
 	Super::BeginPlay();
-
-	// ...
-	
+	if(!bIsEnabled)
+	{
+		// Remove Component if not enabled
+		//UnregisterComponent();
+		DestroyComponent();
+		return;
+	}
 }
 
 void URangedComponent::StartAttack()

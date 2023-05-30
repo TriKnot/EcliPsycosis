@@ -55,12 +55,16 @@ public:
 
 	/** Toggle Hitbox on and off */
 	UFUNCTION(BlueprintCallable)
-	void ToggleHitBox(bool bIsEnabled);
+	void ToggleHitBox(bool bHitBoxEnabled);
 	
 	/*UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Elemental Effect")
 	EEffectType CurrentEffectType;*/
 
 	/** Configurator Variables **/
+
+	/** Flag to set if component is enabled */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Configurator")
+	bool bIsEnabled = false;
 
 	/** Light Attack Damage **/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Configurator")

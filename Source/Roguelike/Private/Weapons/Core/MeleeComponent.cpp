@@ -10,6 +10,14 @@
 void UMeleeComponent::BeginPlay()
 {
 	Super::BeginPlay();
+	if(!bIsEnabled)
+	{
+		// Remove Component if not enabled
+		//UnregisterComponent();
+		DestroyComponent();
+		return;
+	}
+		
 	TArray<UActorComponent*> _temp = GetOwner()->GetComponentsByTag(UShapeComponent::StaticClass(), TEXT("MeleeHitBox"));
 	//TODO: Need to Find a better way to Do this 
 	for (const auto obj : _temp)
@@ -67,9 +75,9 @@ void UMeleeComponent::WeaponAbility()
 
 
 
-void UMeleeComponent::ToggleHitBox(bool bIsEnabled)
+void UMeleeComponent::ToggleHitBox(bool bHitBoxEnabled)
 {
-	if(bIsEnabled)
+	if(bHitBoxEnabled)
 	{
 		for (const auto HitBox : HitBoxes)
 		{
