@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Weapon.h"
 #include "Components/ActorComponent.h"
+#include <limits>
 #include "RangedComponent.generated.h"
 
 class AProjectile;
@@ -33,6 +34,8 @@ public:
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
+	// Called when the game ends
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 public:
 	/** Functions to Start and Stop Attack State **/
@@ -55,9 +58,16 @@ public:
 	/** Implementation of Weapon Ability **/
 	virtual void WeaponAbility() override;
 
+	/** Cooldown for next shot */
+	void StartCooldownTimer();
+	
+	/** Reload function -> Default to max value/max ammo*/
+	UFUNCTION(BlueprintCallable)
+	void Reload(int32 AmmoToReload = 2147483647);
 
 	FORCEINLINE void SetTarget(AActor* _Target) { Target = _Target; };
 
+	UFUNCTION(BlueprintCallable)
 	FORCEINLINE void SetFirePoint(USceneComponent* _FirePoint) { FirePoint = _FirePoint; };
 	
 	/** Configurator Variables **/
@@ -82,13 +92,36 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Configurator")
 	float AttackModifier;
 
+	/** Shoot Cooldown -> In seconds
+	 * Values less than 0 will be translated to 0
+	 */
+	UPROPERTY( EditAnywhere, BlueprintReadOnly, Category = "Configurator")
+	float ShootCooldown;
+	
+	/** Max Ammunition
+	 * Values equal or less than 0 will treated as infinite
+	 */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Configurator")
+	int32 MaxAmmunition;
+
+	/** Current Ammunition Amount */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Configurator")
+	int32 CurrentAmmunition;
+	
 	/** Types that this component can attack and damage */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Configurator")
 	ECanDamageTypes CanDamageTypes;
 
+	/** Flag for if it can shoot */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Configurator")
+	bool bCanShoot = true;
+
+	/** Shot Cooldown Timer Handle */
+	FTimerHandle ShootCooldownTimerHandle;
+
 private:
 
-	void SpawnProjectile(TSubclassOf<AProjectile> ProjectileClass ) const;
+	void SpawnProjectile(TSubclassOf<AProjectile> ProjectileClass );
 	
 	/** Projectile Class to Spawn **/
 	UPROPERTY(EditAnywhere, Category = "Configurator")

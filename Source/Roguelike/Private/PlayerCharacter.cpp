@@ -12,6 +12,7 @@
 #include "Weapons/Core/MeleeComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Weapons/Core/RangedComponent.h"
 
 // Sets default values
 APlayerCharacter::APlayerCharacter()
@@ -35,6 +36,9 @@ APlayerCharacter::APlayerCharacter()
 
 	// Create MeleeComponent
 	MeleeComponent = CreateDefaultSubobject<UMeleeComponent>(TEXT("MeleeComponent"));
+
+	// Create RangedComponent
+	RangedComponent = CreateDefaultSubobject<URangedComponent>(TEXT("RangedComponent"));
 
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -241,7 +245,7 @@ void APlayerCharacter::LightAttack()
 void APlayerCharacter::HeavyAttack()
 {
 	if (bCanDoAction)
-		MeleeComponent->HeavyAttack();
+		RangedComponent->HeavyAttack();
 }
 
 void APlayerCharacter::Pause()

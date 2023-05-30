@@ -85,9 +85,13 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = HitBox, meta = (AllowPrivateAccess = "true"))
 		class UHurtBox* HurtBox;
 
-	/** MeleeComponent **/
+	/** Melee Component **/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	class UMeleeComponent* MeleeComponent;
+
+	/** Range Component */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	class URangedComponent* RangedComponent;
 
 	/** Dash Timer Handles */
 	FTimerHandle DashFrameTimerHandle;

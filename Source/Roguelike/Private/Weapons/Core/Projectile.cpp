@@ -15,13 +15,17 @@ AProjectile::AProjectile()
 {
 	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>("Mesh");
 	RootComponent = MeshComponent;
-	MeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	MeshComponent->OnComponentBeginOverlap.AddDynamic(this, &AProjectile::OnProjectileOverlap);
+	MeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	
 	HitSphere = CreateDefaultSubobject<USphereComponent>("HitBox");
 	HitSphere->SetupAttachment(RootComponent);
-	HitSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	HitSphere->OnComponentBeginOverlap.AddDynamic(this, &AProjectile::OnHitOverlap);
+	HitSphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+
+	DamageSphere = CreateDefaultSubobject<USphereComponent>("DamageBox");
+	DamageSphere->SetupAttachment(RootComponent);
+	DamageSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	ToggleHitBox(false);
 	
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -34,38 +38,83 @@ void AProjectile::BeginPlay()
 	
 }
 
-void AProjectile::OnProjectileOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+void AProjectile::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
+	Super::EndPlay(EndPlayReason);
+	// Clear Timer
+	if( DespawnTimerHandle.IsValid() )
+		GetWorld()->GetTimerManager().ClearTimer(DespawnTimerHandle);
+}
+
+void AProjectile::OnProjectileOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+                                      UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	UE_LOG( LogTemp, Warning, TEXT("Projectile Overlapping with %s"), *OtherActor->GetName() );
+	if( OtherActor == Owner || OtherActor == this )
+		return;
 	ToggleHitBox(true);
+	bShouldMove = false;
+	// Schedule Despawn
+	if(OnHitDamageTime > 0.f)
+	{
+		GetWorld()->GetTimerManager().SetTimer(DespawnTimerHandle, this, &AProjectile::Despawn, OnHitDamageTime, false);
+	}else
+	{
+		// Set active for one frame to allow for damage to be applied then despawn
+		GetWorld()->GetTimerManager().SetTimerForNextTick(this, &AProjectile::Despawn);		
+	}
+	
 }
 
 void AProjectile::OnHitOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+	UE_LOG( LogTemp, Warning, TEXT("Projectile Hit Overlapping with %s"), *OtherComp->GetName() );
 	IDamageSystem* DamageSystem;
 	if(TryGetDamageSystem(OtherComp, DamageSystem))
 	{
+		UE_LOG( LogTemp, Warning, TEXT("Transfer Damage to %s"), *OtherComp->GetName() );
 		DamageSystem->TransferDamage(Damage * DamageMultiplier);
 		DamagedActors.AddUnique(OtherActor);
 	}
-	}
+}
 
 // Called every frame
 void AProjectile::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	MoveProjectile(DeltaTime);
+	if(bShouldMove)
+		MoveProjectile(DeltaTime);
+}
+
+void AProjectile::Init(AActor* _InTarget, ECanDamageTypes _CanDamageTypes, AActor* _InOwner)
+{
+	Target = _InTarget;
+	CanDamageTypes = _CanDamageTypes;
+	SetOwner(_InOwner);
+	HitSphere->OnComponentBeginOverlap.AddDynamic(this, &AProjectile::OnProjectileOverlap);
+}
+
+void AProjectile::SetDamageSphereRadius(float _Radius)
+{
+	if(DamageSphere)
+		DamageSphere->SetSphereRadius(_Radius);
 }
 
 void AProjectile::MoveProjectile(float DeltaTime)
 {
-	if (!Target)
-		return;
-
-	const FVector TargetLocation = Target->GetActorLocation();
+	FVector Direction;
 	const FVector CurrentLocation = GetActorLocation();
-	FVector Direction = TargetLocation - CurrentLocation;
+	
+	if (Target)
+	{
+		const FVector TargetLocation = Target->GetActorLocation();
+		Direction = TargetLocation - CurrentLocation;
+	}else
+	{
+		Direction = GetActorForwardVector();
+	}
+	
 	Direction.Normalize();
 	const FRotator TargetRotation = Direction.Rotation();
 	const FRotator CurrentRotation = GetActorRotation();
@@ -74,34 +123,35 @@ void AProjectile::MoveProjectile(float DeltaTime)
 	SetActorLocation(CurrentLocation + GetActorForwardVector() * Speed * DeltaTime, true);
 	LifeTimeElapsed += DeltaTime;
 	if (LifeTimeElapsed >= LifeTime)
-		Destroy();
-	
+		Despawn();
 }
 
 void AProjectile::ToggleHitBox(bool bIsEnabled)
 {
 	if(bIsEnabled)
 	{
-			// Enable collision for the HitBox
-			HitSphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+		DamageSphere->OnComponentBeginOverlap.AddDynamic(this, &AProjectile::OnHitOverlap);
 
-			// Fins all the Overlapping Components
-			TArray<UPrimitiveComponent*> OverlappingComponents;
-			HitSphere->GetOverlappingComponents(OverlappingComponents);
-			// Loop through all and Damage all the Overlapping Actors
-			for (UPrimitiveComponent* Component : OverlappingComponents)
+		// Enable collision for the HitBox
+		DamageSphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+
+		// Find all the Overlapping Components
+		TArray<UPrimitiveComponent*> OverlappingComponents;
+		DamageSphere->GetOverlappingComponents(OverlappingComponents);
+		// Loop through all and Damage all the Overlapping Actors
+		for (UPrimitiveComponent* Component : OverlappingComponents)
+		{
+			IDamageSystem* DamageSystem;
+			if(TryGetDamageSystem(Component, DamageSystem))
 			{
-				IDamageSystem* DamageSystem;
-				if(TryGetDamageSystem(Component, DamageSystem))
-				{
-					DamageSystem->TransferDamage(Damage * DamageMultiplier);
-					DamagedActors.AddUnique(Component->GetOwner());
-				}
+				DamageSystem->TransferDamage(Damage * DamageMultiplier);
+				DamagedActors.AddUnique(Component->GetOwner());
 			}
+		}
 	}
 	else
 	{
-		HitSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		DamageSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
 }
 
@@ -111,8 +161,7 @@ bool AProjectile::TryGetDamageSystem(UPrimitiveComponent* OtherComponent, IDamag
 	
 	if ( OtherActor == GetOwner() || DamagedActors.Contains(OtherActor))
 		return false;
-
-
+	
 	if (CanDamageTypes == ECanDamageTypes::CDT_Player)
 	{
 		if (!OtherActor->IsA(APlayerCharacter::StaticClass()))
@@ -127,7 +176,13 @@ bool AProjectile::TryGetDamageSystem(UPrimitiveComponent* OtherComponent, IDamag
 	OutDamageSystem = Cast<IDamageSystem>(OtherComponent);
 	if(!OutDamageSystem)
 		return false;
-
-	
 	return true;
+}
+
+void AProjectile::Despawn()
+{
+	if(DespawnTimerHandle.IsValid())
+		GetWorld()->GetTimerManager().ClearTimer(DespawnTimerHandle);
+	
+	Destroy();
 }

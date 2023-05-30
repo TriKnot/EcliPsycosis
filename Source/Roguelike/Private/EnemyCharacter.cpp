@@ -18,11 +18,11 @@ AEnemyCharacter::AEnemyCharacter()
 	PrimaryActorTick.bCanEverTick = false;
 
 	// Detection Trigger Sphere
-	DetectionTriggerSphere = CreateDefaultSubobject<USphereComponent>(TEXT("DetectTriggerSphere"));
-	DetectionTriggerSphere->SetupAttachment(GetMesh());
-	DetectionTriggerSphere->InitSphereRadius(1500.f);
-	DetectionTriggerSphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	DetectionTriggerSphere->OnComponentBeginOverlap.AddDynamic(this, &AEnemyCharacter::OnDetectTriggerEnter);
+	// DetectionTriggerSphere = CreateDefaultSubobject<USphereComponent>(TEXT("DetectTriggerSphere"));
+	// DetectionTriggerSphere->SetupAttachment(GetMesh());
+	// DetectionTriggerSphere->InitSphereRadius(1500.f);
+	// DetectionTriggerSphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	// DetectionTriggerSphere->OnComponentBeginOverlap.AddDynamic(this, &AEnemyCharacter::OnDetectTriggerEnter);
 
 	// Hurt Box
 	HurtBox = CreateDefaultSubobject<UHurtBox>(TEXT("HurtBox"));

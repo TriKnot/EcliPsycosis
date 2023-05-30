@@ -13,7 +13,7 @@ void UMeleeComponent::BeginPlay()
 	if(!bIsEnabled)
 	{
 		// Remove Component if not enabled
-		//UnregisterComponent();
+		UnregisterComponent();
 		DestroyComponent();
 		return;
 	}
@@ -22,7 +22,7 @@ void UMeleeComponent::BeginPlay()
 	//TODO: Need to Find a better way to Do this 
 	for (const auto obj : _temp)
 		HitBoxes.Add(Cast<UShapeComponent>(obj));
-	checkf(!(HitBoxes.Num() <= 0), TEXT("Add a HitBox To the MeleeComponent HitBox Array"));
+	checkf(HitBoxes.Num() > 0, TEXT("Add a HitBox To the MeleeComponent HitBox Array"));
 	for (const auto HitBox : HitBoxes)
 	{
 		HitBox->OnComponentBeginOverlap.AddDynamic(this, &UMeleeComponent::OverlapBegin);

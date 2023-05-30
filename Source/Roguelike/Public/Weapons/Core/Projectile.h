@@ -8,7 +8,6 @@
 #include "CustomStructs/EnumSet.h"
 #include "Projectile.generated.h"
 
-enum class EProjectileType : uint8;
 class USphereComponent;
 
 UCLASS()
@@ -23,6 +22,8 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	// Called when the game ends
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 private:
 	/** Handles checking for hit */
@@ -38,21 +39,55 @@ private:
 	UPROPERTY(EditDefaultsOnly)
 	UStaticMeshComponent* MeshComponent;
 
-	/** Hit Box -> Handles Damaging Other Actors */
+	/** Hit Box -> Handles hit overlaps */
 	UPROPERTY(EditDefaultsOnly)
 	USphereComponent* HitSphere;
+
+	/** Damage Sphere -> Handles Damaging Other Actors */
+	UPROPERTY(EditDefaultsOnly)
+	USphereComponent* DamageSphere;
 
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	/** Init Function*/
+	void Init(AActor* _InTarget, ECanDamageTypes _CanDamageTypes, AActor* _InOwner);
+
+	/** Sets target for tracking */
 	FORCEINLINE void SetTarget(AActor* _Target){ Target = _Target; }
+
+	/** Set which targets can be damages by projectile */
 	FORCEINLINE void SetCanDamageTypes(ECanDamageTypes _CanDamageTypes){ CanDamageTypes = _CanDamageTypes; }
+
+	/** Set Damage multiplier -> Final Damage = Damage * Multiplier */
 	FORCEINLINE void SetDamageMultiplier(float _DamageMultiplier){ DamageMultiplier = _DamageMultiplier; }
+
+	/** Add Lifetime to projectile increasing how long it will be before auto despawn */
+	FORCEINLINE void AddLifeTime(float _LifeTime){ LifeTime += _LifeTime; }
+
+	/** Set Damage Sphere Radius -> Only use this to change during runtime, in editor please change in BP */
+	void SetDamageSphereRadius(float _Radius);
+private:
+	/** Function to move projectile along path -> Called in Tick */
 	void MoveProjectile(float DeltaTime);
+	
+	/** Toggles HitBox on and off
+	 * Checks for overlaps when enabled
+	 */
 	void ToggleHitBox(bool bIsEnabled);
+
+	/** Returns true if any DamageSystems are found
+	 * Passed in DamageSystem will be set to the first found
+	 */
 	bool TryGetDamageSystem(UPrimitiveComponent* OtherComponent, IDamageSystem*& OutDamageSystem) const;
 
+	/** Despawn and clean up projectile */
+	void Despawn();
+
+	/** Despawn Timer Handle */
+	FTimerHandle DespawnTimerHandle;
+	
 	/** Projectile Target */
 	UPROPERTY(VisibleAnywhere)
 	AActor* Target;
@@ -81,15 +116,22 @@ public:
 	 */
 	UPROPERTY(EditDefaultsOnly)
 	float TurnRate = 10;
-
+	
 	/** Types that this component can attack and damage */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Configurator")
+	UPROPERTY(EditAnywhere, Category = "Configurator")
 	ECanDamageTypes CanDamageTypes;
 
-	/* Damageable Objects that have already been hit during an attack*/
+	/** Damageable Objects that have already been hit during an attack*/
 	UPROPERTY()
 	TArray<AActor*> DamagedActors;
 
+	/** On hit Damage time -> How long the damaging part should be enabled after collision
+	 * A time of 0 or less will be active for one frame
+	 */
+	UPROPERTY(EditDefaultsOnly)
+	float OnHitDamageTime = 0.1f;
 
+	/** Set to false when projectile should stop moving */
+	bool bShouldMove = true;
 	
 };
