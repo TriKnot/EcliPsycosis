@@ -2,8 +2,6 @@
 
 #pragma once
 
-#include <optional>
-
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "Weapon.h"
@@ -82,7 +80,7 @@ public:
 
 	/** Types that this component can attack and damage */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Configurator")
-	TEnumAsByte< ECanDamageTypes::Type > CanDamageTypes;
+	ECanDamageTypes CanDamageTypes;
 	
 public:
 	UFUNCTION()

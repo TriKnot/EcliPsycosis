@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "AIController.h"
-#include "BehaviorTree/BehaviorTreeTypes.h"
+#include "CustomStructs/EnumSet.h"
 #include "RogueLikeAIController.generated.h"
 
 class AEnemyCharacter;
@@ -24,6 +24,8 @@ public:
 	/** Setup */
 	void SetBehaviorTree(UBehaviorTree* _InBehaviorTree);
 	void SetDefaultBlackboardValues() const;
+
+	void UpdateEcpliseState(ENatureState _NewState);
 
 	/** Sets player detected key to true */
 	UFUNCTION()

@@ -3,9 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Weapon.h"
 #include "Damage/DamageSystem.h"
 #include "GameFramework/Actor.h"
+#include "CustomStructs/EnumSet.h"
 #include "Projectile.generated.h"
 
 enum class EProjectileType : uint8;
@@ -30,6 +30,7 @@ private:
 	void OnProjectileOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
 		int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 	/** Handles resolving of hit */
+	UFUNCTION()
 	void OnHitOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
 	                  int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
@@ -46,7 +47,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	FORCEINLINE void SetTarget(AActor* _Target){ Target = _Target; }
-	FORCEINLINE void SetCanDamageTypes(TEnumAsByte< ECanDamageTypes::Type > _CanDamageTypes){ CanDamageTypes = _CanDamageTypes; }
+	FORCEINLINE void SetCanDamageTypes(ECanDamageTypes _CanDamageTypes){ CanDamageTypes = _CanDamageTypes; }
 	FORCEINLINE void SetDamageMultiplier(float _DamageMultiplier){ DamageMultiplier = _DamageMultiplier; }
 	void MoveProjectile(float DeltaTime);
 	void ToggleHitBox(bool bIsEnabled);
@@ -83,7 +84,7 @@ public:
 
 	/** Types that this component can attack and damage */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Configurator")
-	TEnumAsByte< ECanDamageTypes::Type > CanDamageTypes;
+	ECanDamageTypes CanDamageTypes;
 
 	/* Damageable Objects that have already been hit during an attack*/
 	UPROPERTY()

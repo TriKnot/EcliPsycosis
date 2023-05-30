@@ -10,6 +10,7 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "BehaviorTree/Blackboard/BlackboardKeyType_Bool.h"
 #include "BehaviorTree/Blackboard/BlackboardKeyType_Object.h"
+#include "Subsystems/EclipseSubsystem.h"
 
 
 void ARogueLikeAIController::BeginPlay()
@@ -19,11 +20,12 @@ void ARogueLikeAIController::BeginPlay()
 	// Find Player Character
 	PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetPawn());
 
-	// Set Default Behavior Tree and run it
-	if (SunPhaseBehaviorTree)
-	{
-		SetBehaviorTree(SunPhaseBehaviorTree);
-	}
+	// Hook up to EclipseSubsystem to be notified of Eclipse Phase
+	UEclipseSubsystem* EclipseSubsystem = GetWorld()->GetSubsystem<UEclipseSubsystem>();
+	if (EclipseSubsystem)
+		EclipseSubsystem->OnNatureStateChanged.AddDynamic(this, &ARogueLikeAIController::UpdateEcpliseState);
+	UBehaviorTree* BehaviorTree = EclipseSubsystem->GetCurrentState() == ENatureState::Sun ? SunPhaseBehaviorTree : EclipsePhaseBehaviorTree;
+	SetBehaviorTree(BehaviorTree);
 
 	// Cache Controlled Pawn
 	ControlledCharacter = Cast<AEnemyCharacter>(GetPawn());
@@ -97,6 +99,20 @@ void ARogueLikeAIController::SetDefaultBlackboardValues() const
 	// Set Default Values
 	Blackboard->SetValueAsBool("PlayerInRange", false);
 	Blackboard->SetValueAsObject("PlayerReference", PlayerCharacter);
+}
+
+void ARogueLikeAIController::UpdateEcpliseState(ENatureState _NewState) 
+{
+	if(_NewState == ENatureState::Eclipse)
+	{
+		if(SunPhaseBehaviorTree)
+			SetBehaviorTree(SunPhaseBehaviorTree);
+	}
+	else
+	{
+		if(EclipsePhaseBehaviorTree)
+			SetBehaviorTree(EclipsePhaseBehaviorTree);
+	}
 }
 
 

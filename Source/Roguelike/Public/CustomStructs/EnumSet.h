@@ -10,9 +10,18 @@
 UENUM(BlueprintType)
 enum class ENatureState : uint8
 {
-	Normal			UMETA(DisplayName = "Normal"),
+	Sun			UMETA(DisplayName = "Sun"),
 	Eclipse			UMETA(DisplayName = "Eclipse")
 };
+
+UENUM(BlueprintType)
+enum class ECanDamageTypes  : uint8
+{
+	CDT_Player			UMETA( DisplayName = "Player" ),
+	CDT_Enemy 			UMETA( DisplayName = "Enemy" ),
+	CDT_Everything 		UMETA( DisplayName = "Everything" )
+};
+
 /**
  * 
  */

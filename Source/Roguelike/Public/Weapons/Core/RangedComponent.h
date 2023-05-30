@@ -80,7 +80,7 @@ public:
 
 	/** Types that this component can attack and damage */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Configurator")
-	TEnumAsByte< ECanDamageTypes::Type > CanDamageTypes;
+	ECanDamageTypes CanDamageTypes;
 
 private:
 

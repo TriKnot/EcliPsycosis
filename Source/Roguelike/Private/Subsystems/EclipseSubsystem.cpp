@@ -10,18 +10,18 @@ UEclipseSubsystem::UEclipseSubsystem()
 	if (EclipseCycleTime < 1.0f)
 		EclipseCycleTime = 60.0f;
 	Accumulator = 0.0f;
-	CurrentNatureState = ENatureState::Normal;
+	CurrentNatureState = ENatureState::Sun;
 }
 
 void UEclipseSubsystem::ToggleNatureState()
 {
 	switch (CurrentNatureState)
 	{
-		case ENatureState::Normal:
+		case ENatureState::Sun:
 			SetCurrentState(ENatureState::Eclipse);
 			break;
 		case ENatureState::Eclipse:
-			SetCurrentState(ENatureState::Normal);
+			SetCurrentState(ENatureState::Sun);
 			break;
 	}
 	OnNatureStateChanged.Broadcast(CurrentNatureState);
@@ -33,7 +33,7 @@ void UEclipseSubsystem::Tick(float DeltaTime)
 		Accumulator += DeltaTime;
 		switch (CurrentNatureState)
 		{
-		case ENatureState::Normal:
+		case ENatureState::Sun:
 			if (Accumulator >= DayCycleTime)
 			{
 				Accumulator = 0.0f;
