@@ -65,10 +65,13 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void Reload(int32 AmmoToReload = 2147483647);
 
+	UFUNCTION(BlueprintCallable)
 	FORCEINLINE void SetTarget(AActor* _Target) { Target = _Target; };
 
 	UFUNCTION(BlueprintCallable)
 	FORCEINLINE void SetFirePoint(USceneComponent* _FirePoint) { FirePoint = _FirePoint; };
+
+
 	
 	/** Configurator Variables **/
 

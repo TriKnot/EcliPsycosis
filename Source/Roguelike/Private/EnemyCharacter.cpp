@@ -52,6 +52,9 @@ void AEnemyCharacter::BeginPlay()
 	// Cache Player Character
 	PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetPawn());
 
+	if(RangedComponent)
+		RangedComponent->SetTarget(PlayerCharacter);
+
 	//Set Default Health
 	Health = MaxHealth;
 
