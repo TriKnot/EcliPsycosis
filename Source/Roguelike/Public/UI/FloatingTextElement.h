@@ -36,7 +36,7 @@ public:
 	class UTextBlock* DamageText;
 
 	/** Animation to play */
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidgetAnim))
+	UPROPERTY(BlueprintReadWrite)
 	UWidgetAnimation* DamageTextAnim;
 
 	/** Starting position for text before any animation */
