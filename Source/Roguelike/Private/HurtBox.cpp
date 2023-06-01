@@ -3,7 +3,7 @@
 
 #include "HurtBox.h"
 
-void UHurtBox::TransferDamage(float _DamageAmount/*, EEffectType _EffectType*/)
+void UHurtBox::TransferDamage(float _DamageAmount, FAttackEffect _EffectType)
 {
-	OnReceivedDamage.Broadcast(_DamageAmount/*, _EffectType*/);
+	OnReceivedDamage.Broadcast(_DamageAmount, _EffectType);
 }

@@ -6,16 +6,11 @@
 #include "GameFramework/Character.h"
 #include "Damage/DamageSystem.h"
 #include "CustomStructs/StructSet.h"
+#include "CustomStructs/EnumSet.h"
 #include "PlayerCharacter.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDashStateChanged, bool, bDashState);
-/*Enum Class to Track the Current Weapon Type that is Equipped*/
-UENUM(Blueprintable, BlueprintType)
-enum class EWeaponMode : uint8
-{
-	Melee			UMETA(DisplayName = "Melee"),
-	Ranged			UMETA(DisplayName = "Ranged")
-};
+
 
 UCLASS()
 class ROGUELIKE_API APlayerCharacter : public ACharacter
@@ -61,7 +56,7 @@ public:
 
 	/* Setter Function for Can Do Action */
 	UFUNCTION()
-	FORCEINLINE void SetterCanDoAction(bool _InBool) { bCanDoAction = !_InBool; }//TODO: We are inverting the setter, need to change that
+		FORCEINLINE void SetterCanDoAction(bool _InBool) { bCanDoAction = !_InBool; bCanMove = !_InBool; }//TODO: We are inverting the setter, need to change that
 
 	/* Setter Function for Can Move */
 	UFUNCTION()
@@ -190,10 +185,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Attacks")
 		void HeavyAttack();
 
-	/** Pause **/
-	UFUNCTION(BlueprintCallable, Category = "Game System")
-		void Pause();
-
 	/** Weapon Ability **/
 	UFUNCTION(BlueprintCallable, Category = "Attacks")
 		void WeaponAbility();
@@ -209,7 +200,7 @@ private:
 
 	/** Function to Receive Damage **/
 	UFUNCTION()
-	void ReceiveDamage(float _InDamage/*, EEffectType _EffectType*/);
+	void ReceiveDamage(float _InDamage, FAttackEffect _EffectType);
 
 	/** Central Function to handle Player Death**/
 	UFUNCTION()

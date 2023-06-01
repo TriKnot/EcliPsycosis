@@ -74,7 +74,7 @@ void AProjectile::OnHitOverlap(UPrimitiveComponent* OverlappedComponent, AActor*
 	if(TryGetDamageSystem(OtherComp, DamageSystem))
 	{
 		UE_LOG( LogTemp, Warning, TEXT("Transfer Damage to %s"), *OtherComp->GetName() );
-		DamageSystem->TransferDamage(Damage * DamageMultiplier);
+		DamageSystem->TransferDamage(Damage * DamageMultiplier, EEffectTypes::AE_None);//TODO: Add Effect
 		DamagedActors.AddUnique(OtherActor);
 	}
 }
@@ -144,7 +144,7 @@ void AProjectile::ToggleHitBox(bool bIsEnabled)
 			IDamageSystem* DamageSystem;
 			if(TryGetDamageSystem(Component, DamageSystem))
 			{
-				DamageSystem->TransferDamage(Damage * DamageMultiplier);
+				DamageSystem->TransferDamage(Damage * DamageMultiplier, EEffectTypes::AE_None);//TODO: Add Effect
 				DamagedActors.AddUnique(Component->GetOwner());
 			}
 		}

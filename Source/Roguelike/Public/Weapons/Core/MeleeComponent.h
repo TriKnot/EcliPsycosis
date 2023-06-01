@@ -78,9 +78,41 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Configurator")
 	float WeaponAbilityDamage;
 
-	/** Attack Modifier**/
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Configurator")
-	float AttackModifier;
+	/** Light Attack Modifier**/
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Configurator")
+	float LightAttackModifier;
+
+	/** Heavy Attack Modifier**/
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Configurator")
+	float HeavyAttackModifier;
+
+	/** Weapon Ability Modifier **/
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Configurator")
+	float WeaponAbilityModifier;
+
+	/** Light Attack Ability **/
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Configurator")
+	EEffectTypes LightAttackEffect;
+
+	/** Heavy Attack Ability **/
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Configurator")
+	EEffectTypes HeavyAttackEffect;
+
+	/** Weapon Ability **/
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Configurator")
+	EEffectTypes WeaponAbilityEffect;
+
+	/** Current Ability **/
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Configurator")
+	EEffectTypes CurrentEffectType;
+
+	/** Damage over Time (If Any) **/
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Configurator")
+	float DamageOverTime;
+
+	/** Attack Effect Time **/
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Configurator")
+	float AttackEffectTime;
 
 	/** Types that this component can attack and damage */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Configurator")
@@ -114,7 +146,9 @@ private:
 	// Returns true if the actor is a valid target for this component
 	// If true, OutDamageSystem will be set to the damage system of the actor
 	bool TryGetDamageSystem(UPrimitiveComponent* OtherComponent, IDamageSystem*& OutDamageSystem) const;
-	
+
+	//Function to make the Attack Struct and Sen Damage
+	void SendDamage(IDamageSystem* _DS);
 };
 
 ///** Light Attack Functions**/

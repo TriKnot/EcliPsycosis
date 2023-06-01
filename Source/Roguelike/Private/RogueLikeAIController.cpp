@@ -105,13 +105,13 @@ void ARogueLikeAIController::UpdateEclipseState(ENatureState _NewState)
 {
 	if(_NewState == ENatureState::Eclipse)
 	{
-		if(SunPhaseBehaviorTree)
-			SetBehaviorTree(SunPhaseBehaviorTree);
+		if(EclipsePhaseBehaviorTree)
+			SetBehaviorTree(EclipsePhaseBehaviorTree);
 	}
 	else
 	{
-		if(EclipsePhaseBehaviorTree)
-			SetBehaviorTree(EclipsePhaseBehaviorTree);
+		if(SunPhaseBehaviorTree)
+			SetBehaviorTree(SunPhaseBehaviorTree);
 	}
 }
 

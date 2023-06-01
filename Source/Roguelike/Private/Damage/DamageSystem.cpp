@@ -4,5 +4,5 @@
 #include "Damage/DamageSystem.h"
 
 // Add default functionality here for any IDamageSystem functions that are not pure virtual.
-void IDamageSystem::TransferDamage(float _DamageAmount/*, EEffectType _EffectType*/)
+void IDamageSystem::TransferDamage(float _DamageAmount, FAttackEffect _EffectType)
 {}

@@ -23,13 +23,16 @@ void UEclipseSubsystem::ToggleNatureState()
 		case ENatureState::Eclipse:
 			SetCurrentState(ENatureState::Sun);
 			break;
+		default:
+			SetCurrentState(ENatureState::Sun);
 	}
 	OnNatureStateChanged.Broadcast(CurrentNatureState);
 }
 
 void UEclipseSubsystem::Tick(float DeltaTime)
 {
-	if(bRunning)
+	if (bRunning)
+	{
 		Accumulator += DeltaTime;
 		switch (CurrentNatureState)
 		{
@@ -50,6 +53,8 @@ void UEclipseSubsystem::Tick(float DeltaTime)
 		default:
 			break;
 		}
+	}
+		
 }
 
 void UEclipseSubsystem::StartRunning()

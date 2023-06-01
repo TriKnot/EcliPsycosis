@@ -1,5 +1,5 @@
 #include "EnemyCharacter.h"
-
+#include "Damage/DamageEffect.h"
 #include "AIController.h"
 #include "HurtBox.h"
 #include "PlayerCharacter.h"
@@ -29,6 +29,11 @@ AEnemyCharacter::AEnemyCharacter()
 	HurtBox->OnReceivedDamage.AddDynamic(this, &AEnemyCharacter::ReceiveDamage);
 	HurtBox->SetupAttachment(RootComponent);
 
+	//DamageEffect
+	DamageEffect = CreateDefaultSubobject<UDamageEffect>(TEXT("DamageEffect"));
+	
+	DamageEffect->OnDamagePerSecond.AddDynamic(this, &AEnemyCharacter::AddHealthPercentage);
+
 	// Melee Component
 	MeleeComponent = CreateDefaultSubobject<UMeleeComponent>(TEXT("MeleeComponent"));
 
@@ -42,6 +47,7 @@ AEnemyCharacter::AEnemyCharacter()
 void AEnemyCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+	HurtBox->OnReceivedDamage.AddDynamic(DamageEffect, &UDamageEffect::DamageReceived);
 
 	// Cache Player Character
 	PlayerCharacter = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetPawn());
@@ -83,13 +89,10 @@ void AEnemyCharacter::Attack()
 	MeleeComponent->LightAttack();
 }
 
-void AEnemyCharacter::ReceiveDamage(float _InDamage)
+void AEnemyCharacter::ReceiveDamage(float _InDamage, FAttackEffect _EffectType)
 {
+	UE_LOG(LogTemp, Warning, TEXT("Health Damage received"));
 	AddHealth(-_InDamage);
-	if (Health <= 0.0f)
-	{
-		EnemyDeath();
-	}
 }
 
 void AEnemyCharacter::EnemyDeath()
@@ -106,6 +109,15 @@ void AEnemyCharacter::AddHealth(float _InHealth)
 		const FString Text = FString::Printf(TEXT("Changing %s health by %f to %f"), *GetName(), _InHealth, Health);
 		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, Text);
 	}
+	if (Health <= 0.0f)
+	{
+		EnemyDeath();
+	}
+}
+
+void AEnemyCharacter::AddHealthPercentage(float _InHealthPercent)
+{
+	AddHealth(Health * _InHealthPercent);
 }
 
 void AEnemyCharacter::RotateToTarget(AActor* TargetActor)

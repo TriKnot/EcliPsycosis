@@ -10,6 +10,15 @@
 void UMeleeComponent::BeginPlay()
 {
 	Super::BeginPlay();
+
+	//SettingModifier Values
+	LightAttackModifier = 1.0f;
+	HeavyAttackModifier = 1.0f;
+	WeaponAbilityModifier = 1.0f;
+	LightAttackEffect = EEffectTypes::AE_None;
+	HeavyAttackEffect = EEffectTypes::AE_None;
+	WeaponAbilityEffect = EEffectTypes::AE_None;
+
 	if(!bIsEnabled)
 	{
 		// Remove Component if not enabled
@@ -17,7 +26,7 @@ void UMeleeComponent::BeginPlay()
 		DestroyComponent();
 		return;
 	}
-		
+	CurrentEffectType = EEffectTypes::AE_None;
 	TArray<UActorComponent*> _temp = GetOwner()->GetComponentsByTag(UShapeComponent::StaticClass(), TEXT("MeleeHitBox"));
 	//TODO: Need to Find a better way to Do this 
 	for (const auto obj : _temp)
@@ -50,7 +59,8 @@ void UMeleeComponent::ClearAttack()
 
 void UMeleeComponent::LightAttack()
 {
-	CurrentDamageValue = LightAttackDamage;
+	CurrentDamageValue = LightAttackDamage * LightAttackModifier;
+	CurrentEffectType = LightAttackEffect;
 	OnLightAttack.Broadcast();
 	OnAttackStateChanged.Broadcast(true);
 }
@@ -59,7 +69,8 @@ void UMeleeComponent::LightAttack()
 
 void UMeleeComponent::HeavyAttack()
 {
-	CurrentDamageValue = HeavyAttackDamage;
+	CurrentDamageValue = HeavyAttackDamage * HeavyAttackModifier;
+	CurrentEffectType = HeavyAttackEffect;
 	OnHeavyAttack.Broadcast();
 	OnAttackStateChanged.Broadcast(true);
 }
@@ -68,7 +79,8 @@ void UMeleeComponent::HeavyAttack()
 
 void UMeleeComponent::WeaponAbility()
 {
-	CurrentDamageValue = WeaponAbilityDamage;
+	CurrentDamageValue = WeaponAbilityDamage * WeaponAbilityModifier;
+	CurrentEffectType = WeaponAbilityEffect;
 	OnWeaponAbility.Broadcast();
 	OnAttackStateChanged.Broadcast(true);
 }
@@ -93,7 +105,8 @@ void UMeleeComponent::ToggleHitBox(bool bHitBoxEnabled)
 				IDamageSystem* DamageSystem;
 				if(TryGetDamageSystem(Component, DamageSystem))
 				{
-					DamageSystem->TransferDamage(CurrentDamageValue + (CurrentDamageValue * AttackModifier)/*, CurrentEffectType*/);
+					//DamageSystem->TransferDamage(CurrentDamageValue, CurrentEffectType);
+					SendDamage(DamageSystem);
 					DamagedActors.AddUnique(Component->GetOwner());
 				}			}
 		}
@@ -109,7 +122,8 @@ void UMeleeComponent::DamageInRangeActors()
 {
 	for (auto _actor : InRangeActors)
 	{
-		_actor->TransferDamage(CurrentDamageValue + (CurrentDamageValue * AttackModifier)/*, CurrentEffectType*/);
+		//_actor->TransferDamage(CurrentDamageValue, CurrentEffectType);
+		SendDamage(_actor);
 		DamagedActors.Add(Cast<USceneComponent>(_actor)->GetOwner());
 	}
 	InRangeActors.Empty();
@@ -147,7 +161,8 @@ void UMeleeComponent::OverlapBegin(UPrimitiveComponent* OverlappedComponent, AAc
 	IDamageSystem* DamageSystem;
 	if(TryGetDamageSystem(OtherComp, DamageSystem))
 	{
-		DamageSystem->TransferDamage(CurrentDamageValue + (CurrentDamageValue * AttackModifier)/*, CurrentEffectType*/);
+		//DamageSystem->TransferDamage(CurrentDamageValue, CurrentEffectType);
+		SendDamage(DamageSystem);
 		DamagedActors.AddUnique(OtherActor);
 	}
 	
@@ -159,6 +174,19 @@ void UMeleeComponent::OverlapEnd(UPrimitiveComponent* OverlappedComponent, AActo
 	{
 		InRangeActors.Remove(_other);
 	}
+}
+
+void UMeleeComponent::SendDamage(IDamageSystem* _DS)
+{
+	FAttackEffect _AE;
+	if (CurrentEffectType != EEffectTypes::AE_None)
+	{
+		_AE._EffectType = CurrentEffectType;
+		_AE.AttackEffectTime = AttackEffectTime;
+		if (CurrentEffectType != EEffectTypes::AE_Stun)
+			_AE.DamageOverTime = DamageOverTime;
+	}
+	_DS->TransferDamage(CurrentDamageValue, _AE);
 }
 
 //void UMeleeComponent::StartLightAttack()

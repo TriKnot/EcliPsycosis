@@ -4,15 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
+#include "CustomStructs/EnumSet.h"
+#include "CustomStructs/StructSet.h"
 #include "DamageSystem.generated.h"
-
-//TODO: Swap out the Placeholder Effects with the actual Effects
-UENUM(BlueprintType, Blueprintable)
-enum class EEffectType : uint8
-{
-	Fire		UMETA(DisplayName = "Fire"),
-	Lightning	UMETA(Displayname = "Lightning")
-};
 
 // This class does not need to be modified.
 UINTERFACE(MinimalAPI, meta = (CannotImplementInterfaceInBlueprint))
@@ -32,5 +26,5 @@ class ROGUELIKE_API IDamageSystem
 public:
 	/** Abstract Function for Damage Transfer **/
 	UFUNCTION(BlueprintCallable, Category = "Damage System Interface")
-	virtual void TransferDamage(float _DamageAmount/*, EEffectType _EffectType*/);
+	virtual void TransferDamage(float _DamageAmount, FAttackEffect _EffectType);
 };

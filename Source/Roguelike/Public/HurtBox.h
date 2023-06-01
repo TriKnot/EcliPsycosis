@@ -7,7 +7,7 @@
 #include "Damage/DamageSystem.h"
 #include "HurtBox.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnReceivedDamage, float, DamageAmount/*, EEffectType, EffectType*/);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnReceivedDamage, float, DamageAmount, FAttackEffect, _EffectType);
 /**
  *
  */
@@ -20,6 +20,6 @@ public:
 	UPROPERTY(BlueprintCallable, BlueprintAssignable) //TODO: Remove Specifiers Later if not needed
 		FOnReceivedDamage OnReceivedDamage;
 	/** Implements TransferDamage **/
-	virtual void TransferDamage(float _DamageAmount/*, EEffectType _EffectType*/) override;
+	virtual void TransferDamage(float _DamageAmount, FAttackEffect _EffectType) override;
 };
 

@@ -87,6 +87,8 @@ void APlayerCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
 		GetWorldTimerManager().ClearTimer(DashEndTimerHandle);
 	if(DashCooldownTimerHandle.IsValid())
 		GetWorldTimerManager().ClearTimer(DashCooldownTimerHandle);
+	if (ItemEffectHandle.IsValid())
+		GetWorldTimerManager().ClearTimer(ItemEffectHandle);
 
 }
 
@@ -220,7 +222,7 @@ void APlayerCharacter::EndDash()
 	// Reset Acceleration Speed
 	GetCharacterMovement()->MaxAcceleration = AccelerationSpeed;
 	// Reset Max Movement Speed
-	GetCharacterMovement()->MaxWalkSpeed = MoveSpeed + (MoveSpeed * ModifierSet.SpeedModifier);
+	GetCharacterMovement()->MaxWalkSpeed = MoveSpeed * ModifierSet.SpeedModifier;
 	// Slow Character to new move speed cap immediately
 	GetCharacterMovement()->Velocity = GetCharacterMovement()->Velocity.GetSafeNormal() * MoveSpeed;
 	//Call the Dash State Changed
@@ -238,28 +240,53 @@ void APlayerCharacter::Interact()
 
 void APlayerCharacter::LightAttack()
 {
-	if(bCanDoAction)
-		MeleeComponent->LightAttack();
+	if (bCanDoAction)
+	{
+		switch (CurrentWeapon)
+		{
+		case EWeaponMode::Melee:
+			MeleeComponent->LightAttack();
+			break;
+		case EWeaponMode::Ranged:
+			RangedComponent->LightAttack();
+		}
+		
+	}
 }
 
 void APlayerCharacter::HeavyAttack()
 {
 	if (bCanDoAction)
-		RangedComponent->HeavyAttack();
-}
+	{
+		switch (CurrentWeapon)
+		{
+		case EWeaponMode::Melee:
+			MeleeComponent->HeavyAttack();
+			break;
+		case EWeaponMode::Ranged:
+			RangedComponent->HeavyAttack();
+		}
 
-void APlayerCharacter::Pause()
-{
-
+	}
 }
 
 void APlayerCharacter::WeaponAbility()
 {
 	if (bCanDoAction)
-		MeleeComponent->WeaponAbility();
+	{
+		switch (CurrentWeapon)
+		{
+		case EWeaponMode::Melee:
+			MeleeComponent->WeaponAbility();
+			break;
+		case EWeaponMode::Ranged:
+			RangedComponent->WeaponAbility();
+		}
+
+	}
 }
 
-void APlayerCharacter::ReceiveDamage(float _InDamage/*, EEffectType _EffectType*/)
+void APlayerCharacter::ReceiveDamage(float _InDamage, FAttackEffect _EffectType)
 {
 	AddHealth( -_InDamage );
 	if (Health <= 0.0f)
@@ -282,8 +309,16 @@ void APlayerCharacter::ImplementModifier(FModifierSet _InSet)
 	bCanPickup = false;
 	ModifierSet = _InSet;
 	AddHealth(Health * _InSet.HPModifier);
-	GetCharacterMovement()->MaxWalkSpeed = MoveSpeed + (MoveSpeed * ModifierSet.SpeedModifier);
-	MeleeComponent->AttackModifier = _InSet.AttackModifier;
+	GetCharacterMovement()->MaxWalkSpeed = MoveSpeed * ModifierSet.SpeedModifier;
+	//TODO: Need to make this better. Find a Way to Switch between melee and ranged
+	MeleeComponent->LightAttackModifier = _InSet.LightAttackModifier;
+	MeleeComponent->LightAttackEffect = _InSet.LightAttackEffect;
+	MeleeComponent->HeavyAttackModifier = _InSet.HeavyAttackModifier;
+	MeleeComponent->HeavyAttackEffect = _InSet.HeavyAttackEffect;
+	MeleeComponent->WeaponAbilityModifier = _InSet.WeaponAbilityModifier;
+	MeleeComponent->WeaponAbilityEffect = _InSet.WeaponAbilityEffect;
+	MeleeComponent->DamageOverTime = _InSet.DamageOverTime;
+	MeleeComponent->AttackEffectTime = _InSet.AttackEffectTime;
 	ItemEffectDelegate.BindUFunction(this, "ClearModifier");
 	GetWorld()->GetTimerManager().SetTimer(ItemEffectHandle, ItemEffectDelegate, _InSet.EffectTime, false);
 }
@@ -293,8 +328,13 @@ void APlayerCharacter::ClearModifier()
 	UE_LOG(LogTemp, Warning, TEXT("Modifiers Cleared"));
 	bCanPickup = true;
 	ModifierSet = FModifierSet::ZERO();
-	GetCharacterMovement()->MaxWalkSpeed = MoveSpeed + (MoveSpeed * ModifierSet.SpeedModifier);
-	MeleeComponent->AttackModifier = 0.0f;
+	GetCharacterMovement()->MaxWalkSpeed = MoveSpeed * ModifierSet.SpeedModifier;
+	MeleeComponent->LightAttackModifier = 1.0f;
+	MeleeComponent->HeavyAttackModifier = 1.0f;
+	MeleeComponent->WeaponAbilityModifier = 1.0f;
+	MeleeComponent->LightAttackEffect = EEffectTypes::AE_None;
+	MeleeComponent->HeavyAttackEffect = EEffectTypes::AE_None;
+	MeleeComponent->WeaponAbilityEffect = EEffectTypes::AE_None;
 	GetWorld()->GetTimerManager().ClearTimer(ItemEffectHandle);
 }
 

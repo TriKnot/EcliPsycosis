@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Damage/DamageSystem.h"
 #include "EnemyCharacter.generated.h"
 
 class APlayerCharacter;
@@ -51,7 +52,7 @@ public:
 
 	/** Function to Receive Damage */
 	UFUNCTION()
-	void ReceiveDamage(float _InDamage/*, EEffectType _EffectType*/);
+	void ReceiveDamage(float _InDamage, FAttackEffect _EffectType);
 
 	/** Central Function to handle Player Death**/
 	UFUNCTION()
@@ -59,6 +60,10 @@ public:
 
 	/** adds both Negative and Positive Health While Clamping it to the Min and Max**/
 	void AddHealth(float _InHealth);
+
+	//** Adds Negative And Positive Health in Percentage **/
+	UFUNCTION()
+	void AddHealthPercentage(float _InHealthPercent);
 
 	/** Rotate Character to Target */
 	UFUNCTION(BlueprintCallable, Category = AI)
@@ -78,6 +83,11 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = AI, meta = (AllowPrivateAccess = "true"))
 	class UHurtBox* HurtBox;
 
+	//** Damage Effect */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = AI, meta = (AllowPrivateAccess = "true"))
+	class UDamageEffect* DamageEffect;
+
+	
 	//////////////////* Stats *////////////////////
 
 	/** Max Health */
