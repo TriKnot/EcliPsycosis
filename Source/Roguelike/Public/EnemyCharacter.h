@@ -46,9 +46,29 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	//** Attack */
-	UFUNCTION(BlueprintCallable, Category = AI)
-	void Attack();
+	/** Light Attack */
+	UFUNCTION(BlueprintCallable, Category = Attacks)
+	void LightAttack();
+	
+	/** Heavy Attack */
+	UFUNCTION(BlueprintCallable, Category = Attacks)
+	void HeavyAttack();
+
+	/** Weapon Ability */
+	UFUNCTION(BlueprintCallable, Category = Attacks)
+	void WeaponAbility();
+
+	/** Ranged Light Attack */
+	UFUNCTION(BlueprintCallable, Category = Attacks)
+	void RangedLightAttack();
+
+	/** Range Heavy Attack */
+	UFUNCTION(BlueprintCallable, Category = Attacks)
+	void RangedHeavyAttack();
+
+	/** Range Weapon Ability */
+	UFUNCTION(BlueprintCallable, Category = Attacks)
+	void RangedWeaponAbility();
 
 	/** Function to Receive Damage */
 	UFUNCTION()

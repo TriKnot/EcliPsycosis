@@ -83,10 +83,59 @@ void AEnemyCharacter::Tick(float DeltaTime)
 
 }
 
-void AEnemyCharacter::Attack()
+void AEnemyCharacter::LightAttack()
 {
 	// Initialize attack here
-	MeleeComponent->LightAttack();
+	if(MeleeComponent)
+		MeleeComponent->LightAttack();
+	else
+		UE_LOG(LogTemp, Warning, TEXT("MeleeComponent not found in %s"), *GetName());
+}
+
+void AEnemyCharacter::HeavyAttack()
+{
+	// Initialize attack here
+	if(MeleeComponent)
+		MeleeComponent->HeavyAttack();
+	else
+		UE_LOG(LogTemp, Warning, TEXT("MeleeComponent not found in %s"), *GetName());
+}
+
+void AEnemyCharacter::WeaponAbility()
+{
+	// Initialize attack here
+	if(MeleeComponent)
+		MeleeComponent->WeaponAbility();
+	else
+		UE_LOG(LogTemp, Warning, TEXT("MeleeComponent not found in %s"), *GetName());
+}
+
+void AEnemyCharacter::RangedLightAttack()
+{
+	// Initialize attack here
+	if(RangedComponent)
+		RangedComponent->LightAttack();
+	else
+		UE_LOG(LogTemp, Warning, TEXT("RangedComponent not found in %s"), *GetName());
+
+}
+
+void AEnemyCharacter::RangedHeavyAttack()
+{
+	// Initialize attack here
+	if(RangedComponent)
+		RangedComponent->HeavyAttack();
+	else
+		UE_LOG(LogTemp, Warning, TEXT("RangedComponent not found in %s"), *GetName());
+}
+
+void AEnemyCharacter::RangedWeaponAbility()
+{
+	// Initialize attack here
+	if(RangedComponent)
+		RangedComponent->WeaponAbility();
+	else
+		UE_LOG(LogTemp, Warning, TEXT("RangedComponent not found in %s"), *GetName());
 }
 
 void AEnemyCharacter::ReceiveDamage(float _InDamage, FAttackEffect _EffectType)
