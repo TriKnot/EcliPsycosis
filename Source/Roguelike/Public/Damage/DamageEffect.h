@@ -19,11 +19,9 @@ public:
 	// Sets default values for this component's properties
 	UDamageEffect();
 
-	~UDamageEffect();
-
 protected:
-	// Called when the game starts
-	virtual void BeginPlay() override;
+	// Called when the game ends
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 public:	
 	// Called every frame

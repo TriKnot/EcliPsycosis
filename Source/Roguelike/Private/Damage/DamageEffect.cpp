@@ -15,22 +15,12 @@ UDamageEffect::UDamageEffect()
 	EffectType = EEffectTypes::AE_None;
 }
 
-UDamageEffect::~UDamageEffect()
+void UDamageEffect::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
+	Super::EndPlay(EndPlayReason);
 	if (DamageEffectHandle.IsValid())
 		GetWorld()->GetTimerManager().ClearTimer(DamageEffectHandle);
 }
-
-
-// Called when the game starts
-void UDamageEffect::BeginPlay()
-{
-	Super::BeginPlay();
-
-	// ...
-	
-}
-
 
 // Called every frame
 void UDamageEffect::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
