@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "HurtBox.h"
 #include "GameFramework/Character.h"
 #include "Damage/DamageSystem.h"
 #include "CustomStructs/StructSet.h"
@@ -211,6 +212,14 @@ public:
 	/** adds both Negative and Positive Health While Clamping it to the Min and Max**/
 	void AddHealth(float _InHealth);
 
+	/** setter for health **/
+	UFUNCTION(BlueprintCallable, Category = "PlayerHealth")
+	FORCEINLINE void SetHealth(int32 _Health)
+	{
+		Health = _Health;
+		if(HurtBox)
+			HurtBox->OnReceivedDamage.Broadcast(0,EEffectTypes::AE_None);
+	}	
 
 private:
 	/** Dash Function -> Recursively calling itself until dash is finished */
