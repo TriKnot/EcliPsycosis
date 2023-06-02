@@ -149,6 +149,8 @@ void AEnemyCharacter::ReceiveDamage(float _InDamage, FAttackEffect _EffectType)
 
 void AEnemyCharacter::EnemyDeath()
 {
+	// BreadCast Death
+	OnEnemyDeath.Broadcast();
 	// Destroy this actor
 	GetWorld()->DestroyActor(this);
 }

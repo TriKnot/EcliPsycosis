@@ -9,6 +9,7 @@ class APlayerCharacter;
 class AAIController;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDetectTriggerEnter);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnEnemyDeath);
 
 UCLASS()
 class ROGUELIKE_API AEnemyCharacter : public ACharacter
@@ -167,6 +168,10 @@ public:
 	/** OnChaseTriggerEnter */
 	UPROPERTY(BlueprintAssignable, Category = AI)
 	FOnDetectTriggerEnter OnDetectTriggerOverlap;
+
+	/** OnDeath */
+	UPROPERTY(BlueprintAssignable, Category = AI)
+	FOnEnemyDeath OnEnemyDeath;
 
 	
 };
