@@ -10,6 +10,7 @@
 #include "PlayerCharacter.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDashStateChanged, bool, bDashState);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerDeath);
 
 
 UCLASS()
@@ -20,6 +21,9 @@ class ROGUELIKE_API APlayerCharacter : public ACharacter
 public:
 	UPROPERTY(BlueprintAssignable, BlueprintCallable)
 	FOnDashStateChanged OnDashStateChanged;
+	
+	UPROPERTY(BlueprintAssignable, BlueprintCallable)
+	FOnPlayerDeath OnPlayerDeath;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	FName MainMenuLevel;

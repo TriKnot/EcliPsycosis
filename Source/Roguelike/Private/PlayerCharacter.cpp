@@ -310,6 +310,7 @@ void APlayerCharacter::PlayerDeath()
 {
 	if (!MainMenuLevel.ToString().IsEmpty())
 	{
+		OnPlayerDeath.Broadcast();
 		UGameplayStatics::OpenLevel(GetWorld(), MainMenuLevel);
 	}
 }
