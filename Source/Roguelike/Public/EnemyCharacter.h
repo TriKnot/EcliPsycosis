@@ -76,7 +76,7 @@ public:
 	void ReceiveDamage(float _InDamage, FAttackEffect _EffectType);
 
 	/** Central Function to handle Player Death**/
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 	void EnemyDeath();
 
 	/** adds both Negative and Positive Health While Clamping it to the Min and Max**/
