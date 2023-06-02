@@ -24,6 +24,9 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	FName MainMenuLevel;
 
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+	void SetDamageBoxPos(USceneComponent* ParentComp);
+
 	// Sets default values for this pawn's properties
 	APlayerCharacter();
 	virtual ~APlayerCharacter() override;
@@ -87,6 +90,18 @@ private:
 	/** Range Component */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	class URangedComponent* RangedComponent;
+
+	/** Light Attack Box Position */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	USceneComponent* LightAttackBoxPos;
+
+	/** Heavy Attack Box Position */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	USceneComponent* HeavyAttackBoxPos;
+
+	/** WeaponAbility Box Position */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	USceneComponent* WeaponAbilityBoxPos;
 
 	/** Dash Timer Handles */
 	FTimerHandle DashFrameTimerHandle;

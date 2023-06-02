@@ -40,6 +40,14 @@ APlayerCharacter::APlayerCharacter()
 	// Create RangedComponent
 	RangedComponent = CreateDefaultSubobject<URangedComponent>(TEXT("RangedComponent"));
 
+	// Create Box Positions for Dynamic Box Movement
+	LightAttackBoxPos = CreateDefaultSubobject<USceneComponent>(TEXT("LightAttackBoxPos"));
+	LightAttackBoxPos->SetupAttachment(GetMesh());
+	HeavyAttackBoxPos = CreateDefaultSubobject<USceneComponent>(TEXT("HeavyAttackBoxPos"));
+	HeavyAttackBoxPos->SetupAttachment(GetMesh());
+	WeaponAbilityBoxPos = CreateDefaultSubobject<USceneComponent>(TEXT("WeaponAbilityBoxPos"));
+	WeaponAbilityBoxPos->SetupAttachment(GetMesh());
+
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -245,6 +253,7 @@ void APlayerCharacter::LightAttack()
 		switch (CurrentWeapon)
 		{
 		case EWeaponMode::Melee:
+			SetDamageBoxPos(LightAttackBoxPos);
 			MeleeComponent->LightAttack();
 			break;
 		case EWeaponMode::Ranged:
@@ -261,6 +270,7 @@ void APlayerCharacter::HeavyAttack()
 		switch (CurrentWeapon)
 		{
 		case EWeaponMode::Melee:
+			SetDamageBoxPos(HeavyAttackBoxPos);
 			MeleeComponent->HeavyAttack();
 			break;
 		case EWeaponMode::Ranged:
@@ -277,6 +287,7 @@ void APlayerCharacter::WeaponAbility()
 		switch (CurrentWeapon)
 		{
 		case EWeaponMode::Melee:
+			SetDamageBoxPos(WeaponAbilityBoxPos);
 			MeleeComponent->WeaponAbility();
 			break;
 		case EWeaponMode::Ranged:

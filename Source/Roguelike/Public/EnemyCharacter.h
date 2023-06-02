@@ -93,6 +93,13 @@ public:
 	UFUNCTION(BlueprintCallable, Category = AI)
 	APlayerCharacter* GetPlayerCharacter() const { return PlayerCharacter; }
 
+	/** Getter For Stun Flag **/
+	UFUNCTION(BlueprintCallable)
+	FORCEINLINE bool GetStunnedStatus() const { return bIsStunned; }
+
+	/** Setter for the Stun Flag **/
+	UFUNCTION(BlueprintCallable)
+	FORCEINLINE void SetStunnedStatus(bool _NewState) { bIsStunned = _NewState; }
 private:
 
 	//** Player Character */
@@ -146,6 +153,11 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI, meta = (AllowPrivateAccess = "true"))
 	float DetectionRangeRadius = 100.0f;
 
+	//////////////////* Flags *////////////////////
+
+	/** Stun Flag **/
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	bool bIsStunned;
 public:
 	
 	/** Chase Trigger Volume */

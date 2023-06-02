@@ -54,6 +54,8 @@ void UDamageEffect::EndEffectTimer()
 void UDamageEffect::DamageReceived(float _DamageAmount, FAttackEffect _EffectType)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Damage received"));
+	if (EffectType == _EffectType._EffectType)
+		return;
 	ClearEffects();
 	EffectType = _EffectType._EffectType;
 	switch (EffectType)
@@ -63,6 +65,7 @@ void UDamageEffect::DamageReceived(float _DamageAmount, FAttackEffect _EffectTyp
 		break;
 	case EEffectTypes::AE_Stun:
 		OnStunStateChanged.Broadcast(true);
+		StartEffectTimer(_EffectType.AttackEffectTime);
 		break;
 	case EEffectTypes::AE_Poison:
 	case EEffectTypes::AE_Burn:

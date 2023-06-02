@@ -31,7 +31,7 @@ AEnemyCharacter::AEnemyCharacter()
 
 	//DamageEffect
 	DamageEffect = CreateDefaultSubobject<UDamageEffect>(TEXT("DamageEffect"));
-	
+	DamageEffect->OnStunStateChanged.AddDynamic(this, &AEnemyCharacter::SetStunnedStatus);
 	DamageEffect->OnDamagePerSecond.AddDynamic(this, &AEnemyCharacter::AddHealthPercentage);
 
 	// Melee Component
