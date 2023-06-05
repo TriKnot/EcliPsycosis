@@ -306,7 +306,7 @@ void APlayerCharacter::ReceiveDamage(float _InDamage, FAttackEffect _EffectType)
 	}
 }
 
-void APlayerCharacter::PlayerDeath()
+void APlayerCharacter::PlayerDeath() const
 {
 	if (!MainMenuLevel.ToString().IsEmpty())
 	{

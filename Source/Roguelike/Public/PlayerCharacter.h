@@ -108,6 +108,10 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	USceneComponent* WeaponAbilityBoxPos;
 
+	/** Attach Sockets for Enemies */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	TArray<FName> AttachSockets;
+	
 	/** Dash Timer Handles */
 	FTimerHandle DashFrameTimerHandle;
 	FTimerHandle DashEndTimerHandle;
@@ -174,6 +178,7 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Modifiers", meta = (AllowPrivateAccess = "true"))
 	FModifierSet ModifierSet;
 
+	/** Item Effect Timer Handles */
 	FTimerHandle ItemEffectHandle;
 	FTimerDelegate ItemEffectDelegate;
 
@@ -211,6 +216,11 @@ public:
 
 	/** adds both Negative and Positive Health While Clamping it to the Min and Max**/
 	void AddHealth(float _InHealth);
+	
+	/** Central Function to handle Player Death**/
+	UFUNCTION()
+	void PlayerDeath() const;
+
 
 	/** setter for health **/
 	UFUNCTION(BlueprintCallable, Category = "PlayerHealth")
@@ -229,10 +239,6 @@ private:
 	/** Function to Receive Damage **/
 	UFUNCTION()
 	void ReceiveDamage(float _InDamage, FAttackEffect _EffectType);
-
-	/** Central Function to handle Player Death**/
-	UFUNCTION()
-	void PlayerDeath();
 
 	UFUNCTION()
 	void ImplementModifier(FModifierSet _InSet);
