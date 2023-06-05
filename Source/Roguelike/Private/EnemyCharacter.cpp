@@ -1,12 +1,10 @@
 #include "EnemyCharacter.h"
 #include "Damage/DamageEffect.h"
-#include "AIController.h"
 #include "HurtBox.h"
 #include "PlayerCharacter.h"
-#include "Components/CapsuleComponent.h"
 #include "Components/SphereComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
-#include "Perception/AIPerceptionComponent.h"
 #include "Weapons/Core/MeleeComponent.h"
 #include "Weapons/Core/RangedComponent.h"
 
@@ -188,5 +186,25 @@ void AEnemyCharacter::RotateToTarget(AActor* TargetActor)
 
 	// Set Actor Rotation
 	SetActorRotation(LookAtRotation);
-	
+
+}
+
+void AEnemyCharacter::CustomJump(const FVector& Destination, float Height, float Speed)
+{
+	const FVector StartLocation = GetActorLocation();
+	FVector JumpApex = (StartLocation + Destination) / 2.0f;
+	JumpApex.Z += Height;
+
+	const float JumpTime = FVector::Dist(StartLocation, JumpApex) / Speed;
+
+	const float Gravity = GetCharacterMovement()->GetGravityZ();
+
+	const float InitialVelocity = (JumpApex.Z - StartLocation.Z + 0.5f * Gravity * JumpTime * JumpTime) / JumpTime;
+
+	FVector JumpVelocity = (Destination - StartLocation) / JumpTime;
+	JumpVelocity.Z = InitialVelocity;
+
+	UE_LOG( LogTemp, Warning, TEXT("JumpVelocity: %s"), *JumpVelocity.ToString() );
+
+	LaunchCharacter(JumpVelocity, true, true);
 }

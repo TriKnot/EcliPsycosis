@@ -101,6 +101,11 @@ public:
 	/** Setter for the Stun Flag **/
 	UFUNCTION(BlueprintCallable)
 	FORCEINLINE void SetStunnedStatus(bool _NewState) { bIsStunned = _NewState; }
+
+	/** Launch Character */
+	UFUNCTION(BlueprintCallable, Category = AI)
+	void CustomJump(const FVector& Destination, float Height, float Speed);
+
 private:
 
 	//** Player Character */
