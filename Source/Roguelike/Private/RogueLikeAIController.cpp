@@ -7,9 +7,6 @@
 #include "NavigationSystem.h"
 #include "PlayerCharacter.h"
 #include "BehaviorTree/BehaviorTree.h"
-#include "BehaviorTree/BlackboardComponent.h"
-#include "BehaviorTree/Blackboard/BlackboardKeyType_Bool.h"
-#include "BehaviorTree/Blackboard/BlackboardKeyType_Object.h"
 #include "Subsystems/EclipseSubsystem.h"
 
 
@@ -25,26 +22,13 @@ void ARogueLikeAIController::BeginPlay()
 	if (EclipseSubsystem)
 		EclipseSubsystem->OnNatureStateChanged.AddDynamic(this, &ARogueLikeAIController::UpdateEclipseState);
 	UBehaviorTree* BehaviorTree = EclipseSubsystem->GetCurrentState() == ENatureState::Sun ? SunPhaseBehaviorTree : EclipsePhaseBehaviorTree;
-	SetBehaviorTree(BehaviorTree);
+	RunBehaviorTree(BehaviorTree);
 
 	// Cache Controlled Pawn
 	ControlledCharacter = Cast<AEnemyCharacter>(GetPawn());
 	if (!ControlledCharacter)
 		return;
-
-	// Subscribe to OnDetectTriggerOverlap
-	ControlledCharacter->OnDetectTriggerOverlap.AddDynamic(this, &ARogueLikeAIController::PlayerDetected);
-
-}
-
-void ARogueLikeAIController::PlayerDetected()
-{
-	// Exit if no Blackboard
-	if (!Blackboard)
-		return;
-
-	Blackboard->SetValueAsBool("PlayerInRange", true);
-
+	
 }
 
 FVector ARogueLikeAIController::FindPositionAwayFromPlayer()
@@ -77,41 +61,19 @@ FVector ARogueLikeAIController::FindPositionAwayFromPlayer()
 	return ResultLocation.Location;
 }
 
-void ARogueLikeAIController::SetBehaviorTree(UBehaviorTree* _InBehaviorTree)
-{
-	RunBehaviorTree(_InBehaviorTree);
-	
-	SetDefaultBlackboardValues();
-}
 
-void ARogueLikeAIController::SetDefaultBlackboardValues() const
-{
-	// Exit if no Blackboard
-	if (!Blackboard)
-		return;
-
-	//Ensure Keys are present
-	if (!Blackboard->IsValidKey(Blackboard->GetKeyID("PlayerInRange")))
-		UE_LOG( LogTemp, Error, TEXT("ARogueLikeAIController:: PlayerInRange Key is not Valid. Please create in Blackboard %s as a %s"), *Blackboard->GetBlackboardAsset()->GetName(), *UBlackboardKeyType_Bool::StaticClass()->GetName() );
-	if (!Blackboard->IsValidKey(Blackboard->GetKeyID("PlayerReference")))
-		UE_LOG( LogTemp, Error, TEXT("ARogueLikeAIController:: PlayerReference Key is not Valid. Please create in Blackboard %s as a %s"), *Blackboard->GetBlackboardAsset()->GetName(), *UBlackboardKeyType_Object::StaticClass()->GetName() );
-
-	// Set Default Values
-	Blackboard->SetValueAsBool("PlayerInRange", false);
-	Blackboard->SetValueAsObject("PlayerReference", PlayerCharacter);
-}
 
 void ARogueLikeAIController::UpdateEclipseState(ENatureState _NewState) 
 {
 	if(_NewState == ENatureState::Eclipse)
 	{
 		if(EclipsePhaseBehaviorTree)
-			SetBehaviorTree(EclipsePhaseBehaviorTree);
+			RunBehaviorTree(EclipsePhaseBehaviorTree);
 	}
 	else
 	{
 		if(SunPhaseBehaviorTree)
-			SetBehaviorTree(SunPhaseBehaviorTree);
+			RunBehaviorTree(SunPhaseBehaviorTree);
 	}
 }
 

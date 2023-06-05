@@ -21,21 +21,12 @@ public:
 	virtual void BeginPlay() override;
 
 	UFUNCTION()
-	/** Setup */
-	void SetBehaviorTree(UBehaviorTree* _InBehaviorTree);
-	void SetDefaultBlackboardValues() const;
-
-	UFUNCTION()
 	void UpdateEclipseState(ENatureState _NewState);
-
-	/** Sets player detected key to true */
-	UFUNCTION()
-	void PlayerDetected();
-
+	
 	/** Find position away from player */
 	UFUNCTION(BlueprintCallable, Category = AI)
 	FVector FindPositionAwayFromPlayer();
-	
+
 private:
 	
 	/** Behavior Tree Sun Phase */
