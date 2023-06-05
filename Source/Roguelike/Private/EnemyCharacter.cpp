@@ -204,7 +204,5 @@ void AEnemyCharacter::CustomJump(const FVector& Destination, float Height, float
 	FVector JumpVelocity = (Destination - StartLocation) / JumpTime;
 	JumpVelocity.Z = InitialVelocity;
 
-	UE_LOG( LogTemp, Warning, TEXT("JumpVelocity: %s"), *JumpVelocity.ToString() );
-
 	LaunchCharacter(JumpVelocity, true, true);
 }
