@@ -26,6 +26,7 @@ public:
 	/** Find position away from player */
 	UFUNCTION(BlueprintCallable, Category = AI)
 	FVector FindPositionAwayFromPlayer();
+	void SetDefaultBlackboardValues() const;
 
 private:
 	

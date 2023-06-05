@@ -7,6 +7,9 @@
 #include "NavigationSystem.h"
 #include "PlayerCharacter.h"
 #include "BehaviorTree/BehaviorTree.h"
+#include "BehaviorTree/BlackboardComponent.h"
+#include "BehaviorTree/Blackboard/BlackboardKeyType_Bool.h"
+#include "BehaviorTree/Blackboard/BlackboardKeyType_Object.h"
 #include "Subsystems/EclipseSubsystem.h"
 
 
@@ -23,12 +26,12 @@ void ARogueLikeAIController::BeginPlay()
 		EclipseSubsystem->OnNatureStateChanged.AddDynamic(this, &ARogueLikeAIController::UpdateEclipseState);
 	UBehaviorTree* BehaviorTree = EclipseSubsystem->GetCurrentState() == ENatureState::Sun ? SunPhaseBehaviorTree : EclipsePhaseBehaviorTree;
 	RunBehaviorTree(BehaviorTree);
+	SetDefaultBlackboardValues();
 
 	// Cache Controlled Pawn
 	ControlledCharacter = Cast<AEnemyCharacter>(GetPawn());
 	if (!ControlledCharacter)
 		return;
-	
 }
 
 FVector ARogueLikeAIController::FindPositionAwayFromPlayer()
@@ -61,7 +64,16 @@ FVector ARogueLikeAIController::FindPositionAwayFromPlayer()
 	return ResultLocation.Location;
 }
 
+void ARogueLikeAIController::SetDefaultBlackboardValues() const
+{
+	// Exit if no Blackboard
+	if (!Blackboard)
+		return;
 
+	//Ensure Keys are present and Set Default Values
+	if (Blackboard->IsValidKey(Blackboard->GetKeyID("PlayerReference")))
+		Blackboard->SetValueAsObject("PlayerReference", PlayerCharacter);
+}
 
 void ARogueLikeAIController::UpdateEclipseState(ENatureState _NewState) 
 {
