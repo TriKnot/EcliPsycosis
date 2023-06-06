@@ -5,6 +5,7 @@
 
 #include "EnemyCharacter.h"
 #include "PlayerCharacter.h"
+#include "Components/CapsuleComponent.h"
 #include "Components/ShapeComponent.h"
 #include "Components/SphereComponent.h"
 #include "Damage/DamageSystem.h"
@@ -13,17 +14,24 @@
 // Sets default values
 AProjectile::AProjectile()
 {
-	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>("Mesh");
-	RootComponent = MeshComponent;
-	MeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	
-	HitSphere = CreateDefaultSubobject<USphereComponent>("HitBox");
-	HitSphere->SetupAttachment(RootComponent);
-	HitSphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 
+	RootComponent = CreateDefaultSubobject<USceneComponent>("Root");
+	
+	
+	HitCapsule = CreateDefaultSubobject<UCapsuleComponent>("HitBox");
+	HitCapsule->SetupAttachment(RootComponent);
+	HitCapsule->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	HitCapsule->SetGenerateOverlapEvents(true);
+	
+	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>("Mesh");
+	MeshComponent->SetupAttachment(RootComponent);
+	MeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	// Make sure that we can rotate Mesh Component
+	
 	DamageSphere = CreateDefaultSubobject<USphereComponent>("DamageBox");
 	DamageSphere->SetupAttachment(RootComponent);
-	DamageSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	DamageSphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	DamageSphere->SetGenerateOverlapEvents(true);
 
 	ToggleHitBox(false);
 	
@@ -49,9 +57,17 @@ void AProjectile::EndPlay(const EEndPlayReason::Type EndPlayReason)
 void AProjectile::OnProjectileOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
                                       UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	UE_LOG( LogTemp, Warning, TEXT("Projectile Overlapping with %s"), *OtherActor->GetName() );
-	if( OtherActor == Owner || OtherActor == this )
+	if( OtherActor == Owner || OtherActor == this)
 		return;
+
+	// Ignore if in ignores actors list
+	for(const TSubclassOf<AActor> IgnoredClass : IgnoredClasses)
+	{
+		if(OtherActor->IsA(IgnoredClass))
+			return;
+	}
+	
+	UE_LOG( LogTemp, Error, TEXT("Projectile Overlapping with %s"), *OtherComp->GetName() );
 	ToggleHitBox(true);
 	bShouldMove = false;
 	// Schedule Despawn
@@ -69,7 +85,6 @@ void AProjectile::OnProjectileOverlap(UPrimitiveComponent* OverlappedComponent, 
 void AProjectile::OnHitOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	UE_LOG( LogTemp, Warning, TEXT("Projectile Hit Overlapping with %s"), *OtherComp->GetName() );
 	IDamageSystem* DamageSystem;
 	if(TryGetDamageSystem(OtherComp, DamageSystem))
 	{
@@ -92,7 +107,7 @@ void AProjectile::Init(AActor* _InTarget, ECanDamageTypes _CanDamageTypes, AActo
 	Target = _InTarget;
 	CanDamageTypes = _CanDamageTypes;
 	SetOwner(_InOwner);
-	HitSphere->OnComponentBeginOverlap.AddDynamic(this, &AProjectile::OnProjectileOverlap);
+	HitCapsule->OnComponentBeginOverlap.AddDynamic(this, &AProjectile::OnProjectileOverlap);
 }
 
 void AProjectile::SetDamageSphereRadius(float _Radius)

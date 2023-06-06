@@ -8,6 +8,7 @@
 #include "CustomStructs/EnumSet.h"
 #include "Projectile.generated.h"
 
+class UCapsuleComponent;
 class USphereComponent;
 
 UCLASS()
@@ -34,18 +35,22 @@ private:
 	UFUNCTION()
 	void OnHitOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
 	                  int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-
+	
 	/** Mesh Component */
 	UPROPERTY(EditDefaultsOnly)
 	UStaticMeshComponent* MeshComponent;
 
 	/** Hit Box -> Handles hit overlaps */
 	UPROPERTY(EditDefaultsOnly)
-	USphereComponent* HitSphere;
+	UCapsuleComponent* HitCapsule;
 
 	/** Damage Sphere -> Handles Damaging Other Actors */
 	UPROPERTY(EditDefaultsOnly)
 	USphereComponent* DamageSphere;
+
+	/** Ignored classes */
+	UPROPERTY(EditDefaultsOnly)
+	TArray<TSubclassOf<AActor>> IgnoredClasses;	
 
 public:	
 	// Called every frame
@@ -112,7 +117,8 @@ private:
 	float LifeTimeElapsed = 0;
 
 	/** Turn speed of projectile to track the target
-	 * 0 = no tracking
+	 * Higher values = Better tracking
+	 * 0 = Perfect tracking
 	 */
 	UPROPERTY(EditDefaultsOnly)
 	float TurnRate = 10;
