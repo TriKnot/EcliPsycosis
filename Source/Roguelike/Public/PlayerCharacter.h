@@ -122,11 +122,11 @@ private:
 
 
 	/** Move Speed -> Saved at start of play so that we can reset to default */
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	float MoveSpeed;
 
 	/** Move Acceleration Speed */
-	UPROPERTY(VisibleAnywhere, Category = "Movement")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = "Movement")
 	float AccelerationSpeed;
 	
 	/** Dash Distance
