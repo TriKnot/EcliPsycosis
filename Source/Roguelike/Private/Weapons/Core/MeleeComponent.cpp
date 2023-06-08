@@ -95,20 +95,22 @@ void UMeleeComponent::ToggleHitBox(bool bHitBoxEnabled)
 		{
 			// Enable collision for the HitBox
 			HitBox->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-
 			// Fins all the Overlapping Components
 			TArray<UPrimitiveComponent*> OverlappingComponents;
 			HitBox->GetOverlappingComponents(OverlappingComponents);
 			// Loop through all and Damage all the Overlapping Actors
 			for (UPrimitiveComponent* Component : OverlappingComponents)
 			{
+				UE_LOG( LogTemp, Warning, TEXT("HitBox Overlapped with %s"), *Component->GetOwner()->GetName());
+				UE_LOG( LogTemp, Warning, TEXT("Owner %s"), *GetOwner()->GetName());
 				IDamageSystem* DamageSystem;
 				if(TryGetDamageSystem(Component, DamageSystem))
 				{
 					//DamageSystem->TransferDamage(CurrentDamageValue, CurrentEffectType);
 					SendDamage(DamageSystem);
 					DamagedActors.AddUnique(Component->GetOwner());
-				}			}
+				}
+			}
 		}
 	}
 	else
