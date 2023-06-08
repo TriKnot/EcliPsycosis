@@ -15,13 +15,6 @@ AEnemyCharacter::AEnemyCharacter()
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 
-	// Detection Trigger Sphere
-	// DetectionTriggerSphere = CreateDefaultSubobject<USphereComponent>(TEXT("DetectTriggerSphere"));
-	// DetectionTriggerSphere->SetupAttachment(GetMesh());
-	// DetectionTriggerSphere->InitSphereRadius(1500.f);
-	// DetectionTriggerSphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	// DetectionTriggerSphere->OnComponentBeginOverlap.AddDynamic(this, &AEnemyCharacter::OnDetectTriggerEnter);
-
 	// Hurt Box
 	HurtBox = CreateDefaultSubobject<UHurtBox>(TEXT("HurtBox"));
 	HurtBox->OnReceivedDamage.AddDynamic(this, &AEnemyCharacter::ReceiveDamage);

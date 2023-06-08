@@ -26,6 +26,16 @@ public:
 	/** Find position away from player */
 	UFUNCTION(BlueprintCallable, Category = AI)
 	FVector FindPositionAwayFromPlayer();
+
+	/** Find positions away from player and of the given distance away from wall */
+	UFUNCTION(BlueprintCallable, Category = AI)
+	void FindPositionsAwayFromPlayerInBounds(float _MoveStepDistance, TArray<FVector>& _Locations, float DistanceFromHit);
+
+	/** Get furthest point in array */
+	UFUNCTION(BlueprintCallable, Category = AI)
+	FVector GetFurthestPointFrom(TArray<FVector> _Locations, FVector _Origin);
+	
+	/** Set default blackboard values */
 	void SetDefaultBlackboardValues() const;
 
 private:
