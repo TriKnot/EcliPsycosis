@@ -8,8 +8,7 @@
 #include "PlayerCharacter.h"
 #include "BehaviorTree/BehaviorTree.h"
 #include "BehaviorTree/BlackboardComponent.h"
-#include "BehaviorTree/Blackboard/BlackboardKeyType_Bool.h"
-#include "BehaviorTree/Blackboard/BlackboardKeyType_Object.h"
+#include "Kismet/KismetSystemLibrary.h"
 #include "Subsystems/EclipseSubsystem.h"
 
 
@@ -63,6 +62,79 @@ FVector ARogueLikeAIController::FindPositionAwayFromPlayer()
 	// Return the furthest point inside of navigable bounds
 	return ResultLocation.Location;
 }
+
+void ARogueLikeAIController::FindPositionsAwayFromPlayerInBounds(float _MoveStepDistance, TArray<FVector>& _Locations, float DistanceFromHit)
+{
+	const FVector ControlledCharacterLocation = ControlledCharacter->GetActorLocation();
+	// Exit if no Player Character
+	if (!PlayerCharacter)
+		return;
+
+	// Find Direction Straight away from Player
+	const FVector PlayerLocation = PlayerCharacter->GetActorLocation();
+	const FVector DirectionFromPlayer = (ControlledCharacterLocation - PlayerLocation).GetSafeNormal();
+
+	// Line trace to find the wall - Rotate the direction by 10 degrees and line trace to cover a total of 90 degress in front of character
+	FHitResult HitResult;
+	FCollisionQueryParams CollisionQueryParams;
+	CollisionQueryParams.AddIgnoredActor(ControlledCharacter);	
+	const UNavigationSystemV1* NavSystem = UNavigationSystemV1::GetNavigationSystem(GetWorld());
+	for (int i = 0; i < 10; i++)
+	{
+		const FVector EndLocation = ControlledCharacterLocation + (DirectionFromPlayer.RotateAngleAxis(i * 10 - 40, FVector::UpVector) * _MoveStepDistance);
+
+		// Line trace to find the wall UKismetSystemLibrary::LineTraceSingle
+		if (UKismetSystemLibrary::LineTraceSingle(GetWorld(),
+			ControlledCharacterLocation,
+			EndLocation,
+			UEngineTypes::ConvertToTraceType(ECC_Visibility),
+			false,
+			TArray<AActor*>(),
+			EDrawDebugTrace::ForDuration,
+			HitResult,
+			true,
+			FLinearColor::Red,
+			FLinearColor::Green,
+			5.f))
+		{
+			// Find position 1m away from the wall
+			const FVector WallLocation = HitResult.Location;
+			const FVector DirectionFromWall = HitResult.ImpactNormal;
+			const FVector TestOriginPosition = WallLocation + (DirectionFromWall * DistanceFromHit);
+			
+			// Project the hit location onto the navmesh
+			FNavLocation ResultLocation;
+			NavSystem->ProjectPointToNavigation(TestOriginPosition, ResultLocation, FVector(100, 100, 100));
+
+			// Check if the projected location is valid
+			if (ResultLocation.Location == FVector::ZeroVector)
+				continue;			
+
+			// Add the location to the array
+			_Locations.Add(ResultLocation.Location);
+		}else
+		{
+			_Locations.Add(EndLocation);
+		}
+	}
+}
+
+FVector ARogueLikeAIController::GetFurthestPointFrom(TArray<FVector> _Locations, FVector _Origin)
+{
+	FVector FurthestLocation = FVector::ZeroVector;
+	float FurthestDistance = 0.f;
+	for (FVector Location : _Locations)
+	{
+		const float Distance = (Location - _Origin).Size();
+		if (Distance > FurthestDistance)
+		{
+			FurthestDistance = Distance;
+			FurthestLocation = Location;
+		}
+	}
+	return FurthestLocation;
+}
+
 
 void ARogueLikeAIController::SetDefaultBlackboardValues() const
 {
