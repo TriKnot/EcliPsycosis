@@ -80,6 +80,9 @@ void ARogueLikeAIController::FindPositionsAwayFromPlayerInBounds(float _MoveStep
 	CollisionQueryParams.AddIgnoredActor(ControlledCharacter);	
 	const UNavigationSystemV1* NavSystem = UNavigationSystemV1::GetNavigationSystem(GetWorld());
 	EDrawDebugTrace::Type DrawDebugType = _bDebug ? EDrawDebugTrace::ForDuration : EDrawDebugTrace::None;
+	FVector LocationToAdd = FVector::ZeroVector;
+	FNavLocation ResultLocation;
+
 	for (int i = 0; i < 10; i++)
 	{
 		const FVector EndLocation = ControlledCharacterLocation + (DirectionFromPlayer.RotateAngleAxis(i * 10 - 40, FVector::UpVector) * _MoveStepDistance);
@@ -105,19 +108,19 @@ void ARogueLikeAIController::FindPositionsAwayFromPlayerInBounds(float _MoveStep
 			const FVector TestOriginPosition = WallLocation + (DirectionFromWall * DistanceFromHit);
 			
 			// Project the hit location onto the navmesh
-			FNavLocation ResultLocation;
 			NavSystem->ProjectPointToNavigation(TestOriginPosition, ResultLocation, FVector(100, 100, 100));
 
 			// Check if the projected location is valid
 			if (ResultLocation.Location == FVector::ZeroVector)
 				continue;			
-
-			// Add the location to the array
-			_Locations.Add(ResultLocation.Location);
 		}else
 		{
-			_Locations.Add(EndLocation);
+			NavSystem->ProjectPointToNavigation(EndLocation, ResultLocation, FVector(100, 100, 100));
+
+			if (ResultLocation.Location == FVector::ZeroVector)
+				continue;			
 		}
+		_Locations.Add(ResultLocation.Location);
 	}
 }
 
