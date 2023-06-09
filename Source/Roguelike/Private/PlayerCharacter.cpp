@@ -380,7 +380,10 @@ void APlayerCharacter::OverlapBegin(UPrimitiveComponent* OverlappedComponent, AA
 
 void APlayerCharacter::SetAssistRotation(FRotator _InRotation)
 {
-	FRotator _Current = GetActorRotation();
-	_Current.Yaw = _InRotation.Yaw;
-	SetActorRotation(_Current);
+	if(_InRotation != FRotator::ZeroRotator)
+	{
+		FRotator _Current = GetActorRotation();
+		_Current.Yaw = _InRotation.Yaw;
+		SetActorRotation(_Current, ETeleportType::TeleportPhysics);
+	}
 }
