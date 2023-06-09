@@ -96,6 +96,10 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	class URangedComponent* RangedComponent;
 
+	/** TargetAssist **/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+		class UTargetAssist* TargetAssist;
+
 	/** Light Attack Box Position */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	USceneComponent* LightAttackBoxPos;
@@ -189,6 +193,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Movement")
 		void MoveRight(float _InValue);
+
+	UFUNCTION()
+		void SetAssistRotation(FRotator _InRotation);
 
 	/** Start Dash Ability */
 	UFUNCTION(BlueprintCallable, Category = "Dash")

@@ -10,6 +10,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Items/PickupItem.h"
 #include "Weapons/Core/MeleeComponent.h"
+#include "Weapons/Core/TargetAssist.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Weapons/Core/RangedComponent.h"
@@ -40,6 +41,8 @@ APlayerCharacter::APlayerCharacter()
 	// Create RangedComponent
 	RangedComponent = CreateDefaultSubobject<URangedComponent>(TEXT("RangedComponent"));
 
+	//Create TargetAssist
+	TargetAssist = CreateDefaultSubobject<UTargetAssist>(TEXT("TargetAssist"));
 	// Create Box Positions for Dynamic Box Movement
 	LightAttackBoxPos = CreateDefaultSubobject<USceneComponent>(TEXT("LightAttackBoxPos"));
 	LightAttackBoxPos->SetupAttachment(GetMesh());
@@ -254,6 +257,7 @@ void APlayerCharacter::LightAttack()
 		{
 		case EWeaponMode::Melee:
 			SetDamageBoxPos(LightAttackBoxPos);
+			SetAssistRotation(TargetAssist->CalculateTargetActor());
 			MeleeComponent->LightAttack();
 			break;
 		case EWeaponMode::Ranged:
@@ -271,6 +275,7 @@ void APlayerCharacter::HeavyAttack()
 		{
 		case EWeaponMode::Melee:
 			SetDamageBoxPos(HeavyAttackBoxPos);
+			SetAssistRotation(TargetAssist->CalculateTargetActor());
 			MeleeComponent->HeavyAttack();
 			break;
 		case EWeaponMode::Ranged:
@@ -288,6 +293,7 @@ void APlayerCharacter::WeaponAbility()
 		{
 		case EWeaponMode::Melee:
 			SetDamageBoxPos(WeaponAbilityBoxPos);
+			SetAssistRotation(TargetAssist->CalculateTargetActor());
 			MeleeComponent->WeaponAbility();
 			break;
 		case EWeaponMode::Ranged:
@@ -370,4 +376,11 @@ void APlayerCharacter::OverlapBegin(UPrimitiveComponent* OverlappedComponent, AA
 		return;
 	ImplementModifier(_Temp->GetModifiers());
 	_Temp->Pickup();
+}
+
+void APlayerCharacter::SetAssistRotation(FRotator _InRotation)
+{
+	FRotator _Current = GetActorRotation();
+	_Current.Yaw = _InRotation.Yaw;
+	SetActorRotation(_Current);
 }
