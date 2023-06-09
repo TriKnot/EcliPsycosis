@@ -64,7 +64,7 @@ public:
 
 	/* Setter Function for Can Do Action */
 	UFUNCTION()
-		FORCEINLINE void SetterCanDoAction(bool _InBool) { bCanDoAction = !_InBool; bCanMove = !_InBool; }//TODO: We are inverting the setter, need to change that
+		FORCEINLINE void SetterCanDoAction(bool _InBool) { bCanDoAction = !_InBool; }//TODO: We are inverting the setter, need to change that
 
 	/* Setter Function for Can Move */
 	UFUNCTION()
