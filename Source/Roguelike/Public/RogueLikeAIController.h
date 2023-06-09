@@ -34,6 +34,10 @@ public:
 	/** Get furthest point in array */
 	UFUNCTION(BlueprintCallable, Category = AI)
 	FVector GetFurthestPointFrom(TArray<FVector> _Locations, FVector _Origin);
+
+	/** Is Player In Range */
+	UFUNCTION(BlueprintCallable, Category = AI)
+	bool IsPlayerInRange(float _Range);
 	
 	/** Set default blackboard values */
 	void SetDefaultBlackboardValues() const;

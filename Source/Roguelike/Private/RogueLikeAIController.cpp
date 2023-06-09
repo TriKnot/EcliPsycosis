@@ -137,6 +137,19 @@ FVector ARogueLikeAIController::GetFurthestPointFrom(TArray<FVector> _Locations,
 	return FurthestLocation;
 }
 
+bool ARogueLikeAIController::IsPlayerInRange(float _Range)
+{
+	// Exit if no Player Character
+	if (!PlayerCharacter)
+		return false;
+	// Find Distance to Player
+	const FVector ControlledCharacterLocation = ControlledCharacter->GetActorLocation();
+	const FVector PlayerLocation = PlayerCharacter->GetActorLocation();
+	const float DistanceToPlayer = (ControlledCharacterLocation - PlayerLocation).Size();
+	// Return true if distance is less than range
+	return DistanceToPlayer < _Range;
+}
+
 
 void ARogueLikeAIController::SetDefaultBlackboardValues() const
 {
@@ -162,6 +175,8 @@ void ARogueLikeAIController::UpdateEclipseState(ENatureState _NewState)
 			RunBehaviorTree(SunPhaseBehaviorTree);
 	}
 }
+
+
 
 
 
