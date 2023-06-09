@@ -63,7 +63,7 @@ FVector ARogueLikeAIController::FindPositionAwayFromPlayer()
 	return ResultLocation.Location;
 }
 
-void ARogueLikeAIController::FindPositionsAwayFromPlayerInBounds(float _MoveStepDistance, TArray<FVector>& _Locations, float DistanceFromHit)
+void ARogueLikeAIController::FindPositionsAwayFromPlayerInBounds(float _MoveStepDistance, TArray<FVector>& _Locations, float DistanceFromHit, bool _bDebug)
 {
 	const FVector ControlledCharacterLocation = ControlledCharacter->GetActorLocation();
 	// Exit if no Player Character
@@ -79,10 +79,12 @@ void ARogueLikeAIController::FindPositionsAwayFromPlayerInBounds(float _MoveStep
 	FCollisionQueryParams CollisionQueryParams;
 	CollisionQueryParams.AddIgnoredActor(ControlledCharacter);	
 	const UNavigationSystemV1* NavSystem = UNavigationSystemV1::GetNavigationSystem(GetWorld());
+	EDrawDebugTrace::Type DrawDebugType = _bDebug ? EDrawDebugTrace::ForDuration : EDrawDebugTrace::None;
 	for (int i = 0; i < 10; i++)
 	{
 		const FVector EndLocation = ControlledCharacterLocation + (DirectionFromPlayer.RotateAngleAxis(i * 10 - 40, FVector::UpVector) * _MoveStepDistance);
 
+		
 		// Line trace to find the wall UKismetSystemLibrary::LineTraceSingle
 		if (UKismetSystemLibrary::LineTraceSingle(GetWorld(),
 			ControlledCharacterLocation,
@@ -90,7 +92,7 @@ void ARogueLikeAIController::FindPositionsAwayFromPlayerInBounds(float _MoveStep
 			UEngineTypes::ConvertToTraceType(ECC_Visibility),
 			false,
 			TArray<AActor*>(),
-			EDrawDebugTrace::ForDuration,
+			DrawDebugType,
 			HitResult,
 			true,
 			FLinearColor::Red,

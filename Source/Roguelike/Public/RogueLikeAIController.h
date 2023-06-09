@@ -29,7 +29,7 @@ public:
 
 	/** Find positions away from player and of the given distance away from wall */
 	UFUNCTION(BlueprintCallable, Category = AI)
-	void FindPositionsAwayFromPlayerInBounds(float _MoveStepDistance, TArray<FVector>& _Locations, float DistanceFromHit);
+	void FindPositionsAwayFromPlayerInBounds(float _MoveStepDistance, TArray<FVector>& _Locations, float DistanceFromHit, bool _bDebug = false);
 
 	/** Get furthest point in array */
 	UFUNCTION(BlueprintCallable, Category = AI)
