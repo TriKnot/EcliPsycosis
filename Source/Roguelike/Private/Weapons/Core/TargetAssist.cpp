@@ -60,8 +60,9 @@ void UTargetAssist::OverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor*
 
 FRotator UTargetAssist::CalculateTargetActor()
 {
-	AActor* ClosestActor;
-	float ClosestDot;
+	AActor* ClosestActor = nullptr;
+	
+	float ClosestDot = 0.0f;
 	FVector2D FWD(GetOwner()->GetActorForwardVector());
 	for (auto _Target : AssistActors)
 	{
@@ -82,6 +83,9 @@ FRotator UTargetAssist::CalculateTargetActor()
 		}
 	}
 
-	return UKismetMathLibrary::FindLookAtRotation(GetOwner()->GetActorLocation(), ClosestActor->GetActorLocation());
+	if(ClosestActor)
+		return UKismetMathLibrary::FindLookAtRotation(GetOwner()->GetActorLocation(), ClosestActor->GetActorLocation());
+
+	return FRotator::ZeroRotator;
 }
 
