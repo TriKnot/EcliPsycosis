@@ -10,6 +10,9 @@
 
 class AProjectile;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FReloadStateChanged, bool, bReloadState);
+
+
 /**
  * Base Class for the Ranged Weapon. 
  */
@@ -30,6 +33,9 @@ public:
 
 	UPROPERTY(BlueprintCallable, BlueprintAssignable)
 	FAttackStateChanged OnAttackStateChanged;
+
+	UPROPERTY(BlueprintCallable, BlueprintAssignable)
+	FReloadStateChanged OnReloadStateChanged;
 
 protected:
 	// Called when the game starts

@@ -92,6 +92,7 @@ void URangedComponent::Reload(int32 AmmoToReload)
 		return;
 
 	CurrentAmmunition = FMath::Clamp(CurrentAmmunition + AmmoToReload, 0, MaxAmmunition);
+	OnReloadStateChanged.Broadcast(true);
 }
 
 void URangedComponent::SpawnProjectile(TSubclassOf<AProjectile> ProjectileClass )
