@@ -75,3 +75,6 @@ DerivedDataCache/*
 
 # Ignore Riderlink plugin
 Plugins/Developer/RiderLink/*
+
+# Store Assets
+Content/DefectPropsVol1/*
