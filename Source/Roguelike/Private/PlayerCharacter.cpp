@@ -387,3 +387,11 @@ void APlayerCharacter::SetAssistRotation(FRotator _InRotation)
 		SetActorRotation(_Current, ETeleportType::TeleportPhysics);
 	}
 }
+
+float APlayerCharacter::GetRemainingItemTime() const
+{
+	if (ItemEffectHandle.IsValid())
+		return GetWorldTimerManager().GetTimerRemaining(ItemEffectHandle);
+	else
+		return 0.0f;
+}
