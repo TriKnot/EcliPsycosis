@@ -5,6 +5,7 @@
 #include "Components/SphereComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Subsystems/WorldStateSubSystem.h"
 #include "Weapons/Core/MeleeComponent.h"
 #include "Weapons/Core/RangedComponent.h"
 
@@ -31,6 +32,7 @@ AEnemyCharacter::AEnemyCharacter()
 	// Ranged Component
 	RangedComponent = CreateDefaultSubobject<URangedComponent>(TEXT("RangedComponent"));
 
+	
 }
 
 
@@ -49,10 +51,21 @@ void AEnemyCharacter::BeginPlay()
 	//Set Default Health
 	Health = MaxHealth;
 
+	// Add self to the list of enemies
+	 GetWorld()->GetSubsystem<UWorldStateSubSystem>()->AddActiveEnemy(this);
+	
+}
+
+void AEnemyCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+
+	// Remove self from the list of enemies
+	GetWorld()->GetSubsystem<UWorldStateSubSystem>()->RemoveActiveEnemy(this);
 }
 
 void AEnemyCharacter::OnDetectTriggerEnter(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+                                           UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	// Exit if not Player Character
 	if (OtherActor != PlayerCharacter)
