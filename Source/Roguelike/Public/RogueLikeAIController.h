@@ -23,21 +23,26 @@ public:
 	UFUNCTION()
 	void UpdateEclipseState(ENatureState _NewState);
 	
-	/** Find position away from player */
-	UFUNCTION(BlueprintCallable, Category = AI)
-	FVector FindPositionAwayFromPlayer();
-
 	/** Find positions away from player and of the given distance away from wall */
 	UFUNCTION(BlueprintCallable, Category = AI)
 	void FindPositionsAwayFromPlayerInBounds(float _MoveStepDistance, TArray<FVector>& _Locations, float DistanceFromHit, bool _bDebug = false);
 
+	/** Find possible cover locations */
+	UFUNCTION(BlueprintCallable, Category = AI)
+	void FindCoverLocations(float _CheckDistance, TArray<FVector>& _Locations, float DistanceFromHit, int32 _DegreesOfPrecision, bool _bDebug);
+	
 	/** Get furthest point in array */
 	UFUNCTION(BlueprintCallable, Category = AI)
 	FVector GetFurthestPointFrom(TArray<FVector> _Locations, FVector _Origin);
-
+	
 	/** Is Player In Range */
 	UFUNCTION(BlueprintCallable, Category = AI)
 	bool IsPlayerInRange(float _Range);
+
+
+	/** Return true if in cover */
+	UFUNCTION(BlueprintCallable, Category = AI)
+	bool IsInCoverFromActor(AActor* _Actor);
 	
 	/** Set default blackboard values */
 	void SetDefaultBlackboardValues() const;
