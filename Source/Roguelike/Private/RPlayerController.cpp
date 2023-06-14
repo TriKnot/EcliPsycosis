@@ -80,6 +80,7 @@ void ARPlayerController::PlayerPause()
 	UGameplayStatics::SetGamePaused(GetWorld(), NewPauseState);
 	if (NewPauseState)
 	{
+		OnGamePaused.Broadcast(true);
 		PauseMenu = CreateWidget<UUserWidget>(this, PauseMenuClass, TEXT("PauseMenu"));
 		PauseMenu->AddToViewport(5);
 	}
@@ -87,6 +88,7 @@ void ARPlayerController::PlayerPause()
 	{
 		if (PauseMenu)
 		{
+			OnGamePaused.Broadcast(false);
 			PauseMenu->RemoveFromParent();
 		}
 	}

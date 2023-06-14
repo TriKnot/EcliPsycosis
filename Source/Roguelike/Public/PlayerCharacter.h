@@ -32,6 +32,9 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
 	void SetDamageBoxPos(USceneComponent* ParentComp);
 
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+		void ItemPicked(AActor* ParentComp);
+
 	// Sets default values for this pawn's properties
 	APlayerCharacter();
 	virtual ~APlayerCharacter() override;

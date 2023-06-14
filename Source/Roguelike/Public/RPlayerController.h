@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
 #include "RPlayerController.generated.h"
-
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGamePaused, bool, bIsGamePaused);
 UENUM(BlueprintType, Blueprintable)
 enum class ECustomInputMode : uint8
 {
@@ -25,7 +25,8 @@ class ROGUELIKE_API ARPlayerController : public APlayerController
 public:
 	// Sets default values for this pawn's properties
 	ARPlayerController();
-
+	UPROPERTY(BlueprintAssignable)
+	FOnGamePaused OnGamePaused;
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

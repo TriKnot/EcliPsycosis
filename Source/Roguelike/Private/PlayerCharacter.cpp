@@ -374,6 +374,7 @@ void APlayerCharacter::OverlapBegin(UPrimitiveComponent* OverlappedComponent, AA
 	IPickupItem* _Temp = Cast<IPickupItem>(OtherActor);
 	if (!_Temp)
 		return;
+	ItemPicked(OtherActor);
 	ImplementModifier(_Temp->GetModifiers());
 	_Temp->Pickup();
 }
