@@ -154,7 +154,6 @@ bool UMeleeComponent::TryGetDamageSystem(UPrimitiveComponent* OtherComponent, ID
 	if(!OutDamageSystem)
 		return false;
 
-	
 	return true;
 }
 
@@ -191,38 +190,3 @@ void UMeleeComponent::SendDamage(IDamageSystem* _DS)
 	_DS->TransferDamage(CurrentDamageValue, _AE);
 }
 
-//void UMeleeComponent::StartLightAttack()
-//{
-//	DamagedActors.Empty();
-//	ToggleHitBox(true);
-//}
-//
-//void UMeleeComponent::EndLightAttack()
-//{
-//	//DamageInRangeActors();
-//	ToggleHitBox(false);
-//	DamagedActors.Empty();
-//	OnAttackStateChanged.Broadcast(false);
-//}
-
-//void UMeleeComponent::StartHeavyAttack()
-//{
-//	DamagedActors.Empty();
-//}
-//
-//void UMeleeComponent::EndHeavyAttack()
-//{
-//	DamagedActors.Empty();
-//	OnAttackStateChanged.Broadcast(false);
-//}
-
-//void UMeleeComponent::StartWeaponAbility()
-//{
-//	DamagedActors.Empty();
-//}
-//
-//void UMeleeComponent::EndWeaponAbility()
-//{
-//	DamagedActors.Empty();
-//	OnAttackStateChanged.Broadcast(false);
-//}

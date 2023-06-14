@@ -66,8 +66,9 @@ void AProjectile::OnProjectileOverlap(UPrimitiveComponent* OverlappedComponent, 
 		if(OtherActor->IsA(IgnoredClass))
 			return;
 	}
+
+	// TODO: Make sure it ignores hitboxes and such
 	
-	UE_LOG( LogTemp, Error, TEXT("Projectile Overlapping with %s"), *OtherComp->GetName() );
 	ToggleHitBox(true);
 	bShouldMove = false;
 	// Schedule Despawn
