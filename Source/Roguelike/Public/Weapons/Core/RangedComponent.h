@@ -106,6 +106,12 @@ public:
 	 */
 	UPROPERTY( EditAnywhere, BlueprintReadOnly, Category = "Configurator")
 	float ShootCooldown;
+
+	/** Reload Cooldown -> In seconds
+	 * Values less than 0 will be translated to 0
+	 */
+	UPROPERTY( EditAnywhere, BlueprintReadOnly, Category = "Configurator")
+	float ReloadTime;
 	
 	/** Max Ammunition
 	 * Values equal or less than 0 will treated as infinite
