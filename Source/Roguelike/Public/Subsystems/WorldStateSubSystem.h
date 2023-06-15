@@ -18,13 +18,25 @@ class ROGUELIKE_API UWorldStateSubSystem : public UWorldSubsystem
 public:
 	
 	UFUNCTION(BlueprintCallable, Category = "WorldStateSubSystem")
-	FORCEINLINE TArray<AEnemyCharacter*> GetActiveEnemies() const { return ActiveEnemies; }
+	FORCEINLINE TArray<AEnemyCharacter*> GetActiveEnemies() const
+	{
+		UE_LOG(LogTemp, Warning, TEXT("ActiveEnemies: %d"), ActiveEnemies.Num());
+		return ActiveEnemies;
+	}
 	
 	UFUNCTION(BlueprintCallable, Category = "WorldStateSubSystem")
-	FORCEINLINE void AddActiveEnemy(AEnemyCharacter* Enemy) { ActiveEnemies.Add(Enemy); }
+	FORCEINLINE void AddActiveEnemy(AEnemyCharacter* Enemy)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("ActiveEnemies: %d"), ActiveEnemies.Num());
+		ActiveEnemies.Add(Enemy);
+	}
 	
 	UFUNCTION(BlueprintCallable, Category = "WorldStateSubSystem")
-	FORCEINLINE void RemoveActiveEnemy(AEnemyCharacter* Enemy) { ActiveEnemies.Remove(Enemy); }
+	FORCEINLINE void RemoveActiveEnemy(AEnemyCharacter* Enemy)
+	{
+		UE_LOG(	LogTemp, Warning, TEXT("ActiveEnemies: %d"), ActiveEnemies.Num());
+		ActiveEnemies.Remove(Enemy);
+	}
 
 	UFUNCTION(BlueprintCallable, Category = "WorldStateSubSystem")
 	FORCEINLINE void ClearActiveEnemies() { ActiveEnemies.Empty(); }
