@@ -378,12 +378,6 @@ void APlayerCharacter::ClearModifier(UEffectController* _OutgoingController)
 void APlayerCharacter::AddHealth(float _InHealth)
 {
 	Health = FMath::Clamp(Health += _InHealth, 0.0f, MaxHealth);
-	
-	if(GEngine)
-	{
-		const FString Text = FString::Printf(TEXT("Changing Player health by %f to %f"), _InHealth, Health);
-		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, Text);
-	}
 }
 
 void APlayerCharacter::OverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)

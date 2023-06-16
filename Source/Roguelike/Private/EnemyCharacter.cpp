@@ -147,7 +147,6 @@ void AEnemyCharacter::RangedWeaponAbility()
 
 void AEnemyCharacter::ReceiveDamage(float _InDamage, FAttackEffect _EffectType)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Health Damage received"));
 	AddHealth(-_InDamage);
 }
 
@@ -162,11 +161,6 @@ void AEnemyCharacter::EnemyDeath()
 void AEnemyCharacter::AddHealth(float _InHealth)
 {
 	Health = FMath::Clamp(Health += _InHealth, 0.0f, MaxHealth);
-	if(GEngine)
-	{
-		const FString Text = FString::Printf(TEXT("Changing %s health by %f to %f"), *GetName(), _InHealth, Health);
-		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, Text);
-	}
 	if (Health <= 0.0f)
 	{
 		EnemyDeath();

@@ -101,12 +101,9 @@ void UMeleeComponent::ToggleHitBox(bool bHitBoxEnabled)
 			// Loop through all and Damage all the Overlapping Actors
 			for (UPrimitiveComponent* Component : OverlappingComponents)
 			{
-				UE_LOG( LogTemp, Warning, TEXT("HitBox Overlapped with %s"), *Component->GetOwner()->GetName());
-				UE_LOG( LogTemp, Warning, TEXT("Owner %s"), *GetOwner()->GetName());
 				IDamageSystem* DamageSystem;
 				if(TryGetDamageSystem(Component, DamageSystem))
 				{
-					//DamageSystem->TransferDamage(CurrentDamageValue, CurrentEffectType);
 					SendDamage(DamageSystem);
 					DamagedActors.AddUnique(Component->GetOwner());
 				}
@@ -124,7 +121,6 @@ void UMeleeComponent::DamageInRangeActors()
 {
 	for (auto _actor : InRangeActors)
 	{
-		//_actor->TransferDamage(CurrentDamageValue, CurrentEffectType);
 		SendDamage(_actor);
 		DamagedActors.Add(Cast<USceneComponent>(_actor)->GetOwner());
 	}
@@ -162,7 +158,6 @@ void UMeleeComponent::OverlapBegin(UPrimitiveComponent* OverlappedComponent, AAc
 	IDamageSystem* DamageSystem;
 	if(TryGetDamageSystem(OtherComp, DamageSystem))
 	{
-		//DamageSystem->TransferDamage(CurrentDamageValue, CurrentEffectType);
 		SendDamage(DamageSystem);
 		DamagedActors.AddUnique(OtherActor);
 	}
