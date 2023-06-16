@@ -6,7 +6,6 @@
 #include "EnemyCharacter.h"
 #include "NavigationSystem.h"
 #include "PlayerCharacter.h"
-#include "BehaviorTree/BehaviorTree.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/KismetSystemLibrary.h"
@@ -24,14 +23,13 @@ void ARogueLikeAIController::BeginPlay()
 	UEclipseSubsystem* EclipseSubsystem = GetWorld()->GetSubsystem<UEclipseSubsystem>();
 	if (EclipseSubsystem)
 		EclipseSubsystem->OnNatureStateChanged.AddDynamic(this, &ARogueLikeAIController::UpdateEclipseState);
-	UBehaviorTree* BehaviorTree = EclipseSubsystem->GetCurrentState() == ENatureState::Sun ? SunPhaseBehaviorTree : EclipsePhaseBehaviorTree;
+	
 	RunBehaviorTree(BehaviorTree);
 	SetDefaultBlackboardValues();
 
 	// Cache Controlled Pawn
 	ControlledCharacter = Cast<AEnemyCharacter>(GetPawn());
-	if (!ControlledCharacter)
-		return;
+
 }
 
 void ARogueLikeAIController::FindPositionsAwayFromPlayerInBounds(float _MoveStepDistance, TArray<FVector>& _Locations, float DistanceFromHit, bool _bDebug)
@@ -149,22 +147,14 @@ void ARogueLikeAIController::FindCoverLocations(float _CheckDistance, TArray<FVe
 			if (ResultLocation.Location == FVector::ZeroVector)
 				continue;			
 
-		}else
-		{
-			NavSystem->ProjectPointToNavigation(EndLocation, ResultLocation, FVector(100, 100, 100));
-			UE_LOG( LogTemp, Warning, TEXT("2Location: %s"), *ResultLocation.Location.ToString() );
-
-			if (ResultLocation.Location == FVector::ZeroVector)
-				continue;			
+			_Locations.Add(ResultLocation.Location);
 		}
-		UE_LOG( LogTemp, Warning, TEXT("3Location: %s"), *ResultLocation.Location.ToString() );
-		_Locations.Add(ResultLocation.Location);
 	}
 	
 	
 }
 
-FVector ARogueLikeAIController::GetFurthestPointFrom(TArray<FVector> _Locations, FVector _Origin)
+FVector ARogueLikeAIController::GetFurthestNavPointPointFrom(TArray<FVector> _Locations, FVector _Origin, bool _Debug)
 {
 	FVector FurthestLocation = FVector::ZeroVector;
 	float FurthestDistance = 0.f;
@@ -177,8 +167,43 @@ FVector ARogueLikeAIController::GetFurthestPointFrom(TArray<FVector> _Locations,
 			FurthestLocation = Location;
 		}
 	}
-	UE_LOG( LogTemp, Warning, TEXT("FurthestLocation: %s"), *FurthestLocation.ToString() );
-	return FurthestLocation;
+
+	// Validate Location on NavMesh
+	const UNavigationSystemV1* NavSystem = UNavigationSystemV1::GetNavigationSystem(GetWorld());
+	FNavLocation ResultLocation;
+	NavSystem->ProjectPointToNavigation(FurthestLocation, ResultLocation, FVector(100, 100, 100));
+	
+	// Draw Debug
+	if(_Debug)
+		DrawDebugSphere(GetWorld(), ResultLocation, 100.f, 12, FColor::Red, false, 5.f);
+	
+	return ResultLocation;
+}
+
+FVector ARogueLikeAIController::GetClosestNavPointPointFrom(TArray<FVector> _Locations, FVector _Origin, bool _Debug)
+{
+	FVector ClosestLocation = FVector::ZeroVector;
+	float ClosestDistance = std::numeric_limits<float>::max();
+	for (FVector Location : _Locations)
+	{
+		const float Distance = (Location - _Origin).Size();
+		if (Distance < ClosestDistance)
+		{
+			ClosestDistance = Distance;
+			ClosestLocation = Location;
+		}
+	}
+	
+	// Validate Location on NavMesh
+	const UNavigationSystemV1* NavSystem = UNavigationSystemV1::GetNavigationSystem(GetWorld());
+	FNavLocation ResultLocation;
+	NavSystem->ProjectPointToNavigation(ClosestLocation, ResultLocation, FVector(100, 100, 100));
+	
+	// Draw Debug
+	if(_Debug)
+		DrawDebugSphere(GetWorld(), ResultLocation, 100.f, 12, FColor::Red, false, 5.f);
+	
+	return ResultLocation;
 }
 
 bool ARogueLikeAIController::IsPlayerInRange(float _Range)
@@ -213,9 +238,9 @@ bool ARogueLikeAIController::IsInCoverFromActor(AActor* _Actor)
 
 	// Setup Line Trace
 	FHitResult HitResult;
-	FCollisionQueryParams CollisionQueryParams;
-	CollisionQueryParams.AddIgnoredActor(ControlledCharacter);
-	CollisionQueryParams.AddIgnoredActor(PlayerCharacter);
+	TArray<AActor*> IgnoredActors;
+	IgnoredActors.Add(ControlledCharacter);
+	IgnoredActors.Add(PlayerCharacter);
 	EDrawDebugTrace::Type DrawDebugType = EDrawDebugTrace::None;
 
 	// Line trace to player and return if something is hit
@@ -224,7 +249,7 @@ bool ARogueLikeAIController::IsInCoverFromActor(AActor* _Actor)
 		EndLocation,
 		UEngineTypes::ConvertToTraceType(ECC_Camera),
 		false,
-		TArray<AActor*>(),
+		IgnoredActors,
 		DrawDebugType,
 		HitResult,
 		true,
@@ -234,7 +259,8 @@ bool ARogueLikeAIController::IsInCoverFromActor(AActor* _Actor)
 
 	AActor* HitActor = HitResult.GetActor();
 
-	UE_LOG( LogTemp, Warning, TEXT("HitActor: %s"), *HitActor->GetName() );
+	if(HitActor)
+		UE_LOG( LogTemp, Warning, TEXT("Controlledcharacter: %s, HitActor: %s"), *ControlledCharacter->GetName(), *HitActor->GetName() );
 	
 	return hit;
 }
@@ -249,19 +275,21 @@ void ARogueLikeAIController::SetDefaultBlackboardValues() const
 	//Ensure Keys are present and Set Default Values
 	if (Blackboard->IsValidKey(Blackboard->GetKeyID("PlayerReference")))
 		Blackboard->SetValueAsObject("PlayerReference", PlayerCharacter);
+	if (Blackboard->IsValidKey(Blackboard->GetKeyID("bIsSunPhase")))
+		Blackboard->SetValueAsBool("bIsSunPhase", true);
 }
 
 void ARogueLikeAIController::UpdateEclipseState(ENatureState _NewState) 
 {
 	if(_NewState == ENatureState::Eclipse)
 	{
-		if(EclipsePhaseBehaviorTree)
-			RunBehaviorTree(EclipsePhaseBehaviorTree);
+		if (Blackboard->IsValidKey(Blackboard->GetKeyID("bIsEclipsePhase")))
+			Blackboard->SetValueAsBool("bIsEclipsePhase", true);
 	}
 	else
 	{
-		if(SunPhaseBehaviorTree)
-			RunBehaviorTree(SunPhaseBehaviorTree);
+		if (Blackboard->IsValidKey(Blackboard->GetKeyID("bIsSunPhase")))
+			Blackboard->SetValueAsBool("bIsSunPhase", true);
 	}
 }
 

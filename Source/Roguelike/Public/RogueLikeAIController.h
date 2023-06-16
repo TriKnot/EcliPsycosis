@@ -33,7 +33,12 @@ public:
 	
 	/** Get furthest point in array */
 	UFUNCTION(BlueprintCallable, Category = AI)
-	FVector GetFurthestPointFrom(TArray<FVector> _Locations, FVector _Origin);
+	FVector GetFurthestNavPointPointFrom(TArray<FVector> _Locations, FVector _Origin, bool _Debug);
+
+	/** Get furthest point in array */
+	UFUNCTION(BlueprintCallable, Category = AI)
+	FVector GetClosestNavPointPointFrom(TArray<FVector> _Locations, FVector _Origin, bool _Debug);
+
 	
 	/** Is Player In Range */
 	UFUNCTION(BlueprintCallable, Category = AI)
@@ -51,12 +56,8 @@ private:
 	
 	/** Behavior Tree Sun Phase */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = AI, meta = (AllowPrivateAccess = "true"))
-	UBehaviorTree* SunPhaseBehaviorTree;
+	UBehaviorTree* BehaviorTree;
 	
-	/** Behaviour Tree Eclipse Phase */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = AI, meta = (AllowPrivateAccess = "true"))
-	UBehaviorTree* EclipsePhaseBehaviorTree;
-
 	/** Controlled Pawn Reference */
 	UPROPERTY(BlueprintReadOnly, Category = AI, meta = (AllowPrivateAccess = "true"))
 	AEnemyCharacter* ControlledCharacter;
