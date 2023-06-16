@@ -23,9 +23,11 @@ void ARogueLikeAIController::BeginPlay()
 	UEclipseSubsystem* EclipseSubsystem = GetWorld()->GetSubsystem<UEclipseSubsystem>();
 	if (EclipseSubsystem)
 		EclipseSubsystem->OnNatureStateChanged.AddDynamic(this, &ARogueLikeAIController::UpdateEclipseState);
-	
+
+	// Set starting Eclipse State
 	RunBehaviorTree(BehaviorTree);
 	SetDefaultBlackboardValues();
+	UpdateEclipseState(EclipseSubsystem->GetCurrentState()); 
 
 	// Cache Controlled Pawn
 	ControlledCharacter = Cast<AEnemyCharacter>(GetPawn());
@@ -275,24 +277,25 @@ void ARogueLikeAIController::SetDefaultBlackboardValues() const
 	//Ensure Keys are present and Set Default Values
 	if (Blackboard->IsValidKey(Blackboard->GetKeyID("PlayerReference")))
 		Blackboard->SetValueAsObject("PlayerReference", PlayerCharacter);
-	if (Blackboard->IsValidKey(Blackboard->GetKeyID("bIsSunPhase")))
-		Blackboard->SetValueAsBool("bIsSunPhase", true);
+	if (!Blackboard->IsValidKey(Blackboard->GetKeyID("bIsSunPhase")))
+		UE_LOG( LogTemp, Warning, TEXT("bIsSunPhase Key not found in %s"), *GetName() );
+	if (Blackboard->IsValidKey(Blackboard->GetKeyID("bIsEclipsePhase")))
+		UE_LOG( LogTemp, Warning, TEXT("bIsEclipsePhase Key not found in %s"), *GetName() );
+	
 }
 
 void ARogueLikeAIController::UpdateEclipseState(ENatureState _NewState) 
 {
-	if(_NewState == ENatureState::Eclipse)
-	{
-		if (Blackboard->IsValidKey(Blackboard->GetKeyID("bIsEclipsePhase")))
-			Blackboard->SetValueAsBool("bIsEclipsePhase", true);
-	}
-	else
-	{
-		if (Blackboard->IsValidKey(Blackboard->GetKeyID("bIsSunPhase")))
-			Blackboard->SetValueAsBool("bIsSunPhase", true);
-	}
+	// Null check blackboard 
+	if(!Blackboard )
+		return;
+	
+	if (Blackboard->IsValidKey(Blackboard->GetKeyID("bIsEclipsePhase")))
+		Blackboard->SetValueAsBool("bIsEclipsePhase", _NewState == ENatureState::Eclipse);
+	
+	if (Blackboard->IsValidKey(Blackboard->GetKeyID("bIsSunPhase")))
+		Blackboard->SetValueAsBool("bIsSunPhase", _NewState != ENatureState::Eclipse);
 }
-
 
 
 
