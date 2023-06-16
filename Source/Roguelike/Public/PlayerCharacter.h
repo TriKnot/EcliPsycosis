@@ -6,6 +6,7 @@
 #include "HurtBox.h"
 #include "GameFramework/Character.h"
 #include "Damage/DamageSystem.h"
+#include "Items/PickupItem.h"
 #include "CustomStructs/StructSet.h"
 #include "CustomStructs/EnumSet.h"
 #include "PlayerCharacter.generated.h"
@@ -13,6 +14,7 @@
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDashStateChanged, bool, bDashState);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerDeath);
 
+class UEffectController;
 
 UCLASS()
 class ROGUELIKE_API APlayerCharacter : public ACharacter
@@ -33,7 +35,7 @@ public:
 	void SetDamageBoxPos(USceneComponent* ParentComp);
 
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
-		void ItemPicked(AActor* ParentComp);
+	void ItemPicked(UEffectController* EffectControl, const TScriptInterface<IPickupItem>& Item);
 
 	// Sets default values for this pawn's properties
 	APlayerCharacter();
@@ -70,7 +72,7 @@ public:
 
 	/* Setter Function for Can Do Action */
 	UFUNCTION()
-		FORCEINLINE void SetterCanDoAction(bool _InBool) { bCanDoAction = !_InBool; }//TODO: We are inverting the setter, need to change that
+	FORCEINLINE void SetterCanDoAction(bool _InBool) { bCanDoAction = !_InBool; }//TODO: We are inverting the setter, need to change that
 
 	/* Setter Function for Can Move */
 	UFUNCTION()
@@ -104,7 +106,7 @@ private:
 
 	/** TargetAssist **/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-		class UTargetAssist* TargetAssist;
+	class UTargetAssist* TargetAssist;
 
 	/** Light Attack Box Position */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
@@ -188,6 +190,9 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Modifiers", meta = (AllowPrivateAccess = "true"))
 	FModifierSet ModifierSet;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Modifiers", meta = (AllowPrivateAccess = "true"))
+	TArray<UEffectController*> ModSets;
+
 	/** Item Effect Timer Handles */
 	FTimerHandle ItemEffectHandle;
 	FTimerDelegate ItemEffectDelegate;
@@ -254,9 +259,12 @@ private:
 	void ReceiveDamage(float _InDamage, FAttackEffect _EffectType);
 
 	UFUNCTION()
-	void ImplementModifier(FModifierSet _InSet);
+	void ImplementModifier(FModifierSet _InSet, const TScriptInterface<IPickupItem>& Item);
 
 	UFUNCTION()
-	void ClearModifier();
+	void ConsolidateModifier();
+
+	UFUNCTION()
+	void ClearModifier(UEffectController* _OutgoingController);
 
 };

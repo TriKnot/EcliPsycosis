@@ -53,6 +53,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float EffectTime;
 
+	
+
 	static FModifierSet ZERO()
 	{
 		return FModifierSet();

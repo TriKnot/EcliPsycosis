@@ -8,10 +8,10 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
-#include "Items/PickupItem.h"
 #include "Weapons/Core/MeleeComponent.h"
 #include "Weapons/Core/TargetAssist.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Items/EffectController.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Weapons/Core/RangedComponent.h"
 
@@ -178,7 +178,6 @@ void APlayerCharacter::Dash()
 	GetWorldTimerManager().SetTimer(DashEndTimerHandle, this, &APlayerCharacter::EndDash, DashMaxDuration, false);
 }
 
-
 void APlayerCharacter::ExecuteDash(FVector TargetDestination)
 {
 
@@ -321,39 +320,59 @@ void APlayerCharacter::PlayerDeath() const
 	}
 }
 
-void APlayerCharacter::ImplementModifier(FModifierSet _InSet)
+void APlayerCharacter::ImplementModifier(FModifierSet _InSet, const TScriptInterface<IPickupItem>& Item)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Modifiers Added"));
-	bCanPickup = false;
-	ModifierSet = _InSet;
+	//Add the New Modifier Set To Our Collection
+	UEffectController* _temp = NewObject<UEffectController>(this);
+	_temp->Init(_InSet, this);
+	_temp->OnEffectComplete.AddDynamic(this, &APlayerCharacter::ClearModifier);
+	ItemPicked(_temp, Item);
+	ModSets.Add(_temp);
+
+	//Consolidate the Modifier Effect
+	ConsolidateModifier();
+
+	//Send the Data to Create Widget
 	AddHealth(Health * _InSet.HPModifier);
-	GetCharacterMovement()->MaxWalkSpeed = MoveSpeed * ModifierSet.SpeedModifier;
-	//TODO: Need to make this better. Find a Way to Switch between melee and ranged
-	MeleeComponent->LightAttackModifier = _InSet.LightAttackModifier;
-	MeleeComponent->LightAttackEffect = _InSet.LightAttackEffect;
-	MeleeComponent->HeavyAttackModifier = _InSet.HeavyAttackModifier;
-	MeleeComponent->HeavyAttackEffect = _InSet.HeavyAttackEffect;
-	MeleeComponent->WeaponAbilityModifier = _InSet.WeaponAbilityModifier;
-	MeleeComponent->WeaponAbilityEffect = _InSet.WeaponAbilityEffect;
-	MeleeComponent->DamageOverTime = _InSet.DamageOverTime;
-	MeleeComponent->AttackEffectTime = _InSet.AttackEffectTime;
-	ItemEffectDelegate.BindUFunction(this, "ClearModifier");
-	GetWorld()->GetTimerManager().SetTimer(ItemEffectHandle, ItemEffectDelegate, _InSet.EffectTime, false);
 }
 
-void APlayerCharacter::ClearModifier()
+void APlayerCharacter::ConsolidateModifier()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Modifiers Cleared"));
-	bCanPickup = true;
 	ModifierSet = FModifierSet::ZERO();
+	for (const auto Mod : ModSets)
+	{
+		ModifierSet.SpeedModifier += Mod->SpeedModifier;
+		ModifierSet.LightAttackModifier += Mod->LightAttackModifier;
+		ModifierSet.HeavyAttackModifier += Mod->HeavyAttackModifier;
+		ModifierSet.WeaponAbilityModifier += Mod->WeaponAbilityModifier;
+		if (Mod->LightAttackEffect != EEffectTypes::AE_None)
+		{
+			ModifierSet.LightAttackEffect = Mod->LightAttackEffect;
+			ModifierSet.DamageOverTime = Mod->DamageOverTime;
+			ModifierSet.AttackEffectTime = Mod->AttackEffectTime;
+		}
+		if (Mod->HeavyAttackEffect != EEffectTypes::AE_None)
+			ModifierSet.HeavyAttackEffect = Mod->HeavyAttackEffect;
+		if (Mod->WeaponAbilityEffect != EEffectTypes::AE_None)
+			ModifierSet.WeaponAbilityEffect = Mod->WeaponAbilityEffect;
+		
+	}
 	GetCharacterMovement()->MaxWalkSpeed = MoveSpeed * ModifierSet.SpeedModifier;
-	MeleeComponent->LightAttackModifier = 1.0f;
-	MeleeComponent->HeavyAttackModifier = 1.0f;
-	MeleeComponent->WeaponAbilityModifier = 1.0f;
-	MeleeComponent->LightAttackEffect = EEffectTypes::AE_None;
-	MeleeComponent->HeavyAttackEffect = EEffectTypes::AE_None;
-	MeleeComponent->WeaponAbilityEffect = EEffectTypes::AE_None;
-	GetWorld()->GetTimerManager().ClearTimer(ItemEffectHandle);
+	MeleeComponent->LightAttackModifier = ModifierSet.LightAttackModifier;
+	MeleeComponent->LightAttackEffect = ModifierSet.LightAttackEffect;
+	MeleeComponent->HeavyAttackModifier = ModifierSet.HeavyAttackModifier;
+	MeleeComponent->HeavyAttackEffect = ModifierSet.HeavyAttackEffect;
+	MeleeComponent->WeaponAbilityModifier = ModifierSet.WeaponAbilityModifier;
+	MeleeComponent->WeaponAbilityEffect = ModifierSet.WeaponAbilityEffect;
+	MeleeComponent->DamageOverTime = ModifierSet.DamageOverTime;
+	MeleeComponent->AttackEffectTime = ModifierSet.AttackEffectTime;
+}
+
+void APlayerCharacter::ClearModifier(UEffectController* _OutgoingController)
+{
+	//Remove the Specific Modifier
+	ModSets.Remove(_OutgoingController);
+	ConsolidateModifier();
 }
 
 void APlayerCharacter::AddHealth(float _InHealth)
@@ -374,8 +393,7 @@ void APlayerCharacter::OverlapBegin(UPrimitiveComponent* OverlappedComponent, AA
 	IPickupItem* _Temp = Cast<IPickupItem>(OtherActor);
 	if (!_Temp)
 		return;
-	ItemPicked(OtherActor);
-	ImplementModifier(_Temp->GetModifiers());
+	ImplementModifier(_Temp->GetModifiers(), TScriptInterface<IPickupItem>(OtherActor));
 	_Temp->Pickup();
 }
 
