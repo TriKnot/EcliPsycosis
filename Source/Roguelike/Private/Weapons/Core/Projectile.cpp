@@ -57,7 +57,10 @@ void AProjectile::EndPlay(const EEndPlayReason::Type EndPlayReason)
 void AProjectile::OnProjectileOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
                                       UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if( OtherActor == Owner || OtherActor == this)
+	if( !OtherComp->IsA(UHurtBox::StaticClass())
+		|| OtherActor == Owner
+		|| OtherActor == this
+		)
 		return;
 
 	// Ignore if in ignores actors list
@@ -66,8 +69,6 @@ void AProjectile::OnProjectileOverlap(UPrimitiveComponent* OverlappedComponent, 
 		if(OtherActor->IsA(IgnoredClass))
 			return;
 	}
-
-	// TODO: Make sure it ignores hitboxes and such
 	
 	ToggleHitBox(true);
 	bShouldMove = false;
