@@ -258,13 +258,13 @@ private:
 	UFUNCTION()
 	void ReceiveDamage(float _InDamage, FAttackEffect _EffectType);
 
-	UFUNCTION()
-	void ImplementModifier(FModifierSet _InSet, const TScriptInterface<IPickupItem>& Item);
+	UFUNCTION(BlueprintCallable, Category = "Modifiers", meta = (AllowPrivateAccess = "true"))
+	UEffectController* ImplementModifier(FModifierSet _InSet, const TScriptInterface<IPickupItem>& Item, bool bIsUIItem = true);
 
 	UFUNCTION()
 	void ConsolidateModifier();
 
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "Modifiers", meta = (AllowPrivateAccess = "true"))
 	void ClearModifier(UEffectController* _OutgoingController);
 
 };

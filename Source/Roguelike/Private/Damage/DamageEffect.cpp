@@ -53,7 +53,6 @@ void UDamageEffect::EndEffectTimer()
 
 void UDamageEffect::DamageReceived(float _DamageAmount, FAttackEffect _EffectType)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Damage received"));
 	if (EffectType == _EffectType._EffectType)
 		return;
 	ClearEffects();

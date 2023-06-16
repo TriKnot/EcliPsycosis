@@ -33,5 +33,7 @@ float UEffectController::EffectTimeRatio() const
 
 void UEffectController::EndEffect()
 {
+	if( ItemEffectHandle.IsValid() )
+		GetWorld()->GetTimerManager().ClearTimer(ItemEffectHandle);
 	OnEffectComplete.Broadcast(this);
 }

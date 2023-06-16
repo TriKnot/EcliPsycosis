@@ -74,9 +74,6 @@ void APlayerCharacter::BeginPlay()
 
 	// Bind Overlap Delegate for Pickup
 	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &APlayerCharacter::OverlapBegin);
-
-	//Set Default Health
-	Health = MaxHealth;
 	
 	// Enable Character Movement and Actions
 	bCanMove = true;
@@ -320,13 +317,16 @@ void APlayerCharacter::PlayerDeath() const
 	}
 }
 
-void APlayerCharacter::ImplementModifier(FModifierSet _InSet, const TScriptInterface<IPickupItem>& Item)
+UEffectController* APlayerCharacter::ImplementModifier(FModifierSet _InSet, const TScriptInterface<IPickupItem>& Item, bool bIsUIItem)
 {
 	//Add the New Modifier Set To Our Collection
 	UEffectController* _temp = NewObject<UEffectController>(this);
 	_temp->Init(_InSet, this);
 	_temp->OnEffectComplete.AddDynamic(this, &APlayerCharacter::ClearModifier);
-	ItemPicked(_temp, Item);
+
+	if(bIsUIItem)
+		ItemPicked(_temp, Item);
+	
 	ModSets.Add(_temp);
 
 	//Consolidate the Modifier Effect
@@ -334,6 +334,8 @@ void APlayerCharacter::ImplementModifier(FModifierSet _InSet, const TScriptInter
 
 	//Send the Data to Create Widget
 	AddHealth(Health * _InSet.HPModifier);
+
+	return _temp;
 }
 
 void APlayerCharacter::ConsolidateModifier()
@@ -341,7 +343,7 @@ void APlayerCharacter::ConsolidateModifier()
 	ModifierSet = FModifierSet::ZERO();
 	for (const auto Mod : ModSets)
 	{
-		ModifierSet.SpeedModifier += Mod->SpeedModifier;
+		ModifierSet.SpeedModifier += ( Mod->SpeedModifier - 1.0f );
 		ModifierSet.LightAttackModifier += Mod->LightAttackModifier;
 		ModifierSet.HeavyAttackModifier += Mod->HeavyAttackModifier;
 		ModifierSet.WeaponAbilityModifier += Mod->WeaponAbilityModifier;

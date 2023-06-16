@@ -26,7 +26,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	float EffectTimeRatio() const;
 
-	UFUNCTION()
+	UFUNCTION( BlueprintCallable )
 	void EndEffect();
 
 	UObject* WorldContextObj;
