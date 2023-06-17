@@ -2,6 +2,7 @@
 #include "Damage/DamageEffect.h"
 #include "HurtBox.h"
 #include "PlayerCharacter.h"
+#include "Components/CapsuleComponent.h"
 #include "Components/SphereComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -32,7 +33,71 @@ AEnemyCharacter::AEnemyCharacter()
 	// Ranged Component
 	RangedComponent = CreateDefaultSubobject<URangedComponent>(TEXT("RangedComponent"));
 
+	// Bind Overlap Delegate for Pickup
+	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &AEnemyCharacter::OnOverlapBegin);
+
+}
+
+void AEnemyCharacter::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if(bCanPickUpItem)
+	{
+		if (bOnItemPickupCooldown)
+			return;
+		IPickupItem* _Temp = Cast<IPickupItem>(OtherActor);
+		if (!_Temp)
+			return;
+		ImplementModifier(_Temp->GetModifiers());
+		_Temp->Pickup();
+	}
+}
+
+void AEnemyCharacter::ImplementModifier(FModifierSet _InSet)
+{
+	bOnItemPickupCooldown = true;
+	ModifierSet.SpeedModifier = _InSet.SpeedModifier;
+	ModifierSet.LightAttackModifier = _InSet.LightAttackModifier;
+	ModifierSet.HeavyAttackModifier = _InSet.HeavyAttackModifier;
+	ModifierSet.WeaponAbilityModifier = _InSet.WeaponAbilityModifier;
+	if (_InSet.LightAttackEffect != EEffectTypes::AE_None)
+	{
+		ModifierSet.LightAttackEffect = _InSet.LightAttackEffect;
+		ModifierSet.DamageOverTime = _InSet.DamageOverTime;
+		ModifierSet.AttackEffectTime = _InSet.AttackEffectTime;
+	}
+	if (_InSet.HeavyAttackEffect != EEffectTypes::AE_None)
+		ModifierSet.HeavyAttackEffect = _InSet.HeavyAttackEffect;
+	if (_InSet.WeaponAbilityEffect != EEffectTypes::AE_None)
+		ModifierSet.WeaponAbilityEffect = _InSet.WeaponAbilityEffect;
 	
+	ApplyModifier();
+	
+	AddHealth(Health * _InSet.HPModifier);
+
+	
+	_InSet.EffectTime > 0.0f ? GetWorldTimerManager().SetTimer(ModifierTimer, this, &AEnemyCharacter::ClearModifier, _InSet.EffectTime, false) : ClearModifier();
+
+}
+
+void AEnemyCharacter::ClearModifier()
+{
+	bOnItemPickupCooldown = false;
+	ModifierSet = FModifierSet::ZERO();
+	ApplyModifier();
+}
+
+void AEnemyCharacter::ApplyModifier() const
+{
+	GetCharacterMovement()->MaxWalkSpeed = MovementSpeed * ModifierSet.SpeedModifier;
+	MeleeComponent->LightAttackModifier = ModifierSet.LightAttackModifier;
+	MeleeComponent->LightAttackEffect = ModifierSet.LightAttackEffect;
+	MeleeComponent->HeavyAttackModifier = ModifierSet.HeavyAttackModifier;
+	MeleeComponent->HeavyAttackEffect = ModifierSet.HeavyAttackEffect;
+	MeleeComponent->WeaponAbilityModifier = ModifierSet.WeaponAbilityModifier;
+	MeleeComponent->WeaponAbilityEffect = ModifierSet.WeaponAbilityEffect;
+	MeleeComponent->DamageOverTime = ModifierSet.DamageOverTime;
+	MeleeComponent->AttackEffectTime = ModifierSet.AttackEffectTime;
 }
 
 
@@ -51,6 +116,9 @@ void AEnemyCharacter::BeginPlay()
 	//Set Default Health
 	Health = MaxHealth;
 
+	// Save max movement speed set in editor
+	MovementSpeed = GetCharacterMovement()->MaxWalkSpeed;
+	
 	// Add self to the list of enemies
 	 GetWorld()->GetSubsystem<UWorldStateSubSystem>()->AddActiveEnemy(this);
 	
@@ -62,15 +130,6 @@ void AEnemyCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 	// Remove self from the list of enemies
 	GetWorld()->GetSubsystem<UWorldStateSubSystem>()->RemoveActiveEnemy(this);
-}
-
-void AEnemyCharacter::OnDetectTriggerEnter(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-                                           UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-{
-	// Exit if not Player Character
-	if (OtherActor != PlayerCharacter)
-		return;
-	OnDetectTriggerOverlap.Broadcast();
 }
 
 void AEnemyCharacter::OnConstruction(const FTransform& Transform)

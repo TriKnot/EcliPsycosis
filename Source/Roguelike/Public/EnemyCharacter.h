@@ -3,6 +3,8 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Damage/DamageSystem.h"
+#include "CustomStructs/StructSet.h"
+#include "CustomStructs/EnumSet.h"
 #include "EnemyCharacter.generated.h"
 
 class APlayerCharacter;
@@ -21,11 +23,17 @@ public:
 	AEnemyCharacter();
 
 private:
-
-	//** On Detect Trigger Overlap Function */
+	
+	//** On Overlap Begin Event */
 	UFUNCTION()
-	void OnDetectTriggerEnter(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
-		int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	void OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
+	                    UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	/** Implement Modifier Function */
+	UFUNCTION()
+	void ImplementModifier(FModifierSet _InSet);
+	void ClearModifier();
+	void ApplyModifier() const;
 
 	/** Melee Component */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
@@ -34,6 +42,11 @@ private:
 	/** Ranged Component */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	class URangedComponent* RangedComponent;
+
+	/** Modifier set */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Modifiers", meta = (AllowPrivateAccess = "true"))
+	FModifierSet ModifierSet;
+
 	
 protected:
 	// Called when an instance of this is placed or spawned
@@ -158,6 +171,10 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI, meta = (AllowPrivateAccess = "true"))
 	float AttackMissChance;
 
+	//** Movement Speed */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = AI, meta = (AllowPrivateAccess = "true"))
+	float MovementSpeed;
+
 	//** Chase Range */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI, meta = (AllowPrivateAccess = "true"))
 	float DetectionRangeRadius = 100.0f;
@@ -167,6 +184,22 @@ private:
 	/** Stun Flag **/
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	bool bIsStunned;
+
+	/** Can Pick Up Item Flag -> Default = false **/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	bool bCanPickUpItem = false;
+
+	/** On Item Pickup CoolDown **/
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	bool bOnItemPickupCooldown = false;
+
+	//////////////////* Timer Handles *////////////////////
+	UPROPERTY()
+	FTimerHandle StunTimerHandle;
+
+	UPROPERTY()
+	FTimerHandle ModifierTimer;
+	
 public:
 	
 	/** Chase Trigger Volume */
