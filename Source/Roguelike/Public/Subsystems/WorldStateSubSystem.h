@@ -22,7 +22,8 @@ public:
 
 	UPROPERTY(BlueprintAssignable, BlueprintCallable)
 	FOnActiveEnemyCountChanged OnActiveEnemyCountChanged;
-	
+
+	/********** Active Enemies **********/
 	UFUNCTION(BlueprintCallable, Category = "WorldStateSubSystem")
 	FORCEINLINE TArray<AEnemyCharacter*> GetActiveEnemies() const {	return ActiveEnemies;	}
 	
@@ -49,8 +50,22 @@ public:
 
 	UFUNCTION(BlueprintCallable , Category = "WorldStateSubSystem")
 	TArray<AEnemyCharacter*> GetActiveEnemiesWithingDistanceFromPoint(FVector Point, float Distance) const;
+
+	/********** Items **********/
+	UFUNCTION(BlueprintCallable, Category = "WorldStateSubSystem")
+	FORCEINLINE TArray<class AItemBase*> GetActiveItems() const { return ActiveItems; }
+
+	UFUNCTION(BlueprintCallable, Category = "WorldStateSubSystem")
+	FORCEINLINE void AddActiveItem(class AItemBase* Item){ ActiveItems.Add(Item); }
+
+	UFUNCTION(BlueprintCallable, Category = "WorldStateSubSystem")
+	FORCEINLINE void RemoveActiveItem(class AItemBase* Item){ ActiveItems.Remove(Item); }
 	
 private:
 	/** Stores all currently active enemies in the world, they should add themselves on beginplay */
 	TArray<AEnemyCharacter*> ActiveEnemies;
+
+	/** Stores all currently active items in the world, they should add themselves on beginplay */
+	TArray<class AItemBase*> ActiveItems;
+	
 };

@@ -35,9 +35,17 @@ public:
 	UFUNCTION(BlueprintCallable, Category = AI)
 	FVector GetFurthestNavPointPointFrom(TArray<FVector> _Locations, FVector _Origin, bool _Debug);
 
-	/** Get furthest point in array */
+	/** Get closest point in array */
 	UFUNCTION(BlueprintCallable, Category = AI)
 	FVector GetClosestNavPointPointFrom(TArray<FVector> _Locations, FVector _Origin, bool _Debug);
+
+	/** Get furthest Actor in array */
+	UFUNCTION(BlueprintCallable, Category = AI)
+	AActor* GetFurthestActorFrom(TArray<AActor*> _Actors, FVector _Origin);
+
+	/** Get closest Actor in array */
+	UFUNCTION(BlueprintCallable, Category = AI)
+	AActor* GetClosestActorFrom(TArray<AActor*> _Actors, FVector _Origin);
 
 	/** Is Player In Range */
 	UFUNCTION(BlueprintCallable, Category = AI)
@@ -67,5 +75,5 @@ private:
 	/** Player Character Reference */
 	UPROPERTY(BlueprintReadOnly, Category = AI, meta = (AllowPrivateAccess = "true"))
 	APlayerCharacter* PlayerCharacter;
-	
+
 };

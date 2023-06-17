@@ -4,6 +4,7 @@
 #include "Items/ItemBase.h"
 #include "Components/SphereComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Subsystems/WorldStateSubSystem.h"
 
 // Sets default values
 AItemBase::AItemBase()
@@ -25,6 +26,16 @@ void AItemBase::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	// Add reference to the item in the world state
+	GetWorld()->GetSubsystem<UWorldStateSubSystem>()->AddActiveItem(this);
+}
+
+void AItemBase::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+	
+	// Remove reference to the item in the world state
+	GetWorld()->GetSubsystem<UWorldStateSubSystem>()->RemoveActiveItem(this);
 }
 
 // Called every frame

@@ -209,6 +209,48 @@ FVector ARogueLikeAIController::GetClosestNavPointPointFrom(TArray<FVector> _Loc
 	return ResultLocation;
 }
 
+AActor* ARogueLikeAIController::GetFurthestActorFrom(TArray<AActor*> _Actors, FVector _Origin)
+{
+	// Exit if no Actors
+	if (_Actors.Num() == 0)
+		return nullptr;
+
+	// Find Furthest Actor
+	AActor* FurthestActor = nullptr;
+	float FurthestDistance = 0.f;
+	for (AActor* Actor : _Actors)
+	{
+		const float Distance = (Actor->GetActorLocation() - _Origin).Size();
+		if (Distance >= FurthestDistance)
+		{
+			FurthestDistance = Distance;
+			FurthestActor = Actor;
+		}
+	}
+	return FurthestActor;
+}
+
+AActor* ARogueLikeAIController::GetClosestActorFrom(TArray<AActor*> _Actors, FVector _Origin)
+{
+	// Exit if no Actors
+	if (_Actors.Num() == 0)
+		return nullptr;
+
+	// Find Closest Actor
+	AActor* ClosestActor = nullptr;
+	float ClosestDistance = std::numeric_limits<float>::max();
+	for (AActor* Actor : _Actors)
+	{
+		const float Distance = (Actor->GetActorLocation() - _Origin).Size();
+		if (Distance <= ClosestDistance)
+		{
+			ClosestDistance = Distance;
+			ClosestActor = Actor;
+		}
+	}
+	return ClosestActor;
+}
+
 bool ARogueLikeAIController::IsPlayerInRange(float _Range)
 {
 	// Exit if no Player Character
