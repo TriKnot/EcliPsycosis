@@ -2,25 +2,57 @@
 
 
 #include "Subsystems/EclipseSubsystem.h"
+#include "Config/CustomGameInstance.h"
 
-UEclipseSubsystem::UEclipseSubsystem()
+
+void UEclipseSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
-	if (DayCycleTime < 1.0f)
-		DayCycleTime = 30.0f;
-	if (EclipseCycleTime < 1.0f)
-		EclipseCycleTime = 60.0f;
+	Super::Initialize(Collection);
+	CurrentGI = Cast<UCustomGameInstance>(GetWorld()->GetGameInstance());
+	if (CurrentGI)
+	{
+		CurrentNatureState = CurrentGI->NatureState;
+		switch (CurrentNatureState)
+		{
+			case ENatureState::Sun:
+				DayCycleTime = CurrentGI->RemainingTime < 0.0f ? CurrentGI->RemainingTime : DAYTIME;
+				break;
+			case ENatureState::Eclipse:
+				EclipseCycleTime = CurrentGI->RemainingTime < 0.0f ? CurrentGI->RemainingTime : ECLIPSETIME;
+				break;
+		}
+	}
 	Accumulator = 0.0f;
-	CurrentNatureState = ENatureState::Sun;
 }
+
+void UEclipseSubsystem::Deinitialize()
+{
+	bRunning = false;
+	if (CurrentGI)
+	{
+		CurrentGI->NatureState = CurrentNatureState;
+		if (CurrentNatureState == ENatureState::Sun)
+		{
+			CurrentGI->RemainingTime = DAYTIME - Accumulator;
+		}
+		else
+		{
+			CurrentGI->RemainingTime = ECLIPSETIME - Accumulator;
+		}
+	}
+}
+
 
 void UEclipseSubsystem::ToggleNatureState()
 {
 	switch (CurrentNatureState)
 	{
 		case ENatureState::Sun:
+			EclipseCycleTime = ECLIPSETIME;
 			SetCurrentState(ENatureState::Eclipse);
 			break;
 		case ENatureState::Eclipse:
+			DayCycleTime = DAYTIME;
 			SetCurrentState(ENatureState::Sun);
 			break;
 		default:

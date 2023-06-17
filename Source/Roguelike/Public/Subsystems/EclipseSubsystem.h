@@ -7,6 +7,11 @@
 #include "CustomStructs/EnumSet.h"
 #include "EclipseSubsystem.generated.h"
 
+const float DAYTIME = 15.0f;
+const float ECLIPSETIME  = 15.0f;
+
+class UCustomGameInstance;
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnNatureStateChanged, ENatureState, NewNatureState);
 /**
  * 
@@ -18,9 +23,12 @@ class ROGUELIKE_API UEclipseSubsystem : public UTickableWorldSubsystem
 
 
 public:
-	UEclipseSubsystem();
+	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
+	virtual void Deinitialize() override;
 
 	virtual void Tick(float DeltaTime) override;
+
+	UCustomGameInstance* CurrentGI;
 
 	UPROPERTY(BlueprintAssignable)
 		FOnNatureStateChanged OnNatureStateChanged;

@@ -10,7 +10,7 @@
 UENUM(BlueprintType)
 enum class ENatureState : uint8
 {
-	Sun			UMETA(DisplayName = "Sun"),
+	Sun				UMETA(DisplayName = "Sun"),
 	Eclipse			UMETA(DisplayName = "Eclipse")
 };
 
