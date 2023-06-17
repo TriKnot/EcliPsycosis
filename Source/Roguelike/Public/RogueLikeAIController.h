@@ -25,7 +25,7 @@ public:
 	
 	/** Find positions away from player and of the given distance away from wall */
 	UFUNCTION(BlueprintCallable, Category = AI)
-	void FindPositionsAwayFromPlayerInBounds(float _MoveStepDistance, TArray<FVector>& _Locations, float DistanceFromHit, bool _bDebug = false);
+	void FindPositionsAwayFromPlayerInBounds(float _PreferredDistance, TArray<FVector>& _Locations, float DistanceFromHit, bool _bDebug = false);
 
 	/** Find possible cover locations */
 	UFUNCTION(BlueprintCallable, Category = AI)
@@ -39,11 +39,13 @@ public:
 	UFUNCTION(BlueprintCallable, Category = AI)
 	FVector GetClosestNavPointPointFrom(TArray<FVector> _Locations, FVector _Origin, bool _Debug);
 
-	
 	/** Is Player In Range */
 	UFUNCTION(BlueprintCallable, Category = AI)
 	bool IsPlayerInRange(float _Range);
 
+	/** Distance to player */
+	UFUNCTION(BlueprintCallable, Category = AI)
+	float DistanceToPlayer();
 
 	/** Return true if in cover */
 	UFUNCTION(BlueprintCallable, Category = AI)

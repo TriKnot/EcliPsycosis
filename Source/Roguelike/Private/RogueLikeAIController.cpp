@@ -34,7 +34,7 @@ void ARogueLikeAIController::BeginPlay()
 
 }
 
-void ARogueLikeAIController::FindPositionsAwayFromPlayerInBounds(float _MoveStepDistance, TArray<FVector>& _Locations, float DistanceFromHit, bool _bDebug)
+void ARogueLikeAIController::FindPositionsAwayFromPlayerInBounds(float _PreferredDistance, TArray<FVector>& _Locations, float DistanceFromHit, bool _bDebug)
 {
 	const FVector ControlledCharacterLocation = ControlledCharacter->GetActorLocation();
 	// Exit if no Player Character
@@ -52,10 +52,11 @@ void ARogueLikeAIController::FindPositionsAwayFromPlayerInBounds(float _MoveStep
 	const UNavigationSystemV1* NavSystem = UNavigationSystemV1::GetNavigationSystem(GetWorld());
 	EDrawDebugTrace::Type DrawDebugType = _bDebug ? EDrawDebugTrace::ForDuration : EDrawDebugTrace::None;
 	FNavLocation ResultLocation;
-
+	float RandomStartAngle = FMath::RandRange(0, 360);
+	
 	for (int i = 0; i < 10; i++)
-	{
-		const FVector EndLocation = ControlledCharacterLocation + (DirectionFromPlayer.RotateAngleAxis(i * 10 - 40, FVector::UpVector) * _MoveStepDistance);
+	{		
+		const FVector EndLocation = ControlledCharacterLocation + (DirectionFromPlayer.RotateAngleAxis(i * 10 - 40 + RandomStartAngle, FVector::UpVector) * _PreferredDistance);
 		
 		// Line trace to find the wall UKismetSystemLibrary::LineTraceSingle
 		if (UKismetSystemLibrary::LineTraceSingle(GetWorld(),
@@ -219,6 +220,17 @@ bool ARogueLikeAIController::IsPlayerInRange(float _Range)
 	const float DistanceToPlayer = (ControlledCharacterLocation - PlayerLocation).Size();
 	// Return true if distance is less than range
 	return DistanceToPlayer < _Range;
+}
+
+float ARogueLikeAIController::DistanceToPlayer()
+{
+	// Exit if no Player Character
+	if (!PlayerCharacter)
+		return 0.f;
+	// Find Distance to Player
+	const FVector ControlledCharacterLocation = ControlledCharacter->GetActorLocation();
+	const FVector PlayerLocation = PlayerCharacter->GetActorLocation();
+	return (ControlledCharacterLocation - PlayerLocation).Size();
 }
 
 
