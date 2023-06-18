@@ -144,7 +144,6 @@ void ARogueLikeAIController::FindCoverLocations(float _CheckDistance, TArray<FVe
 			
 			// Project the hit location onto the navmesh
 			NavSystem->ProjectPointToNavigation(TestOriginPosition, ResultLocation, FVector(100, 100, 100));
-			UE_LOG( LogTemp, Warning, TEXT("1Location: %s"), *ResultLocation.Location.ToString() );
 
 			// Check if the projected location is valid
 			if (ResultLocation.Location == FVector::ZeroVector)
@@ -315,9 +314,6 @@ bool ARogueLikeAIController::IsInCoverFromActor(AActor* _Actor)
 
 	AActor* HitActor = HitResult.GetActor();
 
-	if(HitActor)
-		UE_LOG( LogTemp, Warning, TEXT("Controlledcharacter: %s, HitActor: %s"), *ControlledCharacter->GetName(), *HitActor->GetName() );
-	
 	return hit;
 }
 
