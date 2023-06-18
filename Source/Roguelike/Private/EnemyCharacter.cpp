@@ -130,6 +130,9 @@ void AEnemyCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 	// Remove self from the list of enemies
 	GetWorld()->GetSubsystem<UWorldStateSubSystem>()->RemoveActiveEnemy(this);
+
+	// Make sure to clear all timers
+	GetWorldTimerManager().ClearAllTimersForObject(this);
 }
 
 void AEnemyCharacter::OnConstruction(const FTransform& Transform)
@@ -265,3 +268,72 @@ void AEnemyCharacter::CustomJump(const FVector& Destination, float Height, float
 
 	LaunchCharacter(JumpVelocity, true, true);
 }
+
+void AEnemyCharacter::AttachEnemyToSocketOnCharacter(ACharacter* OtherActor, FName SocketName)
+{
+	// Check if Other Actor is valid
+	if (!OtherActor)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Other Actor is not valid in %s"), *GetName());
+		return;
+	}
+	// Get Socket Transform from Other Actor
+	const FTransform SocketTransform = OtherActor->GetMesh()->GetSocketTransform(SocketName);
+	// Check if socket is valid
+	if (SocketTransform.IsValid())
+	{
+		// Set Attached Parent
+		AttachedParent = OtherActor;
+		// Set Attached Socket Name
+		AttachedSocketName = SocketName;
+		// Set Attach Flag
+		bIsAttached = true;
+		// Disable Collision
+		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		// Disable Physics
+		GetCapsuleComponent()->SetSimulatePhysics(false);
+		// Set Actor Location to Socket Location
+		SetActorLocation(SocketTransform.GetLocation());
+		// Set Actor Rotation to Socket Rotation
+		SetActorRotation(SocketTransform.GetRotation());
+		// Schedule next move 
+		GetWorldTimerManager().SetTimerForNextTick(	this, &AEnemyCharacter::MoveWithSocket);
+		
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Socket %s not found in %s"), *SocketName.ToString(), *GetName());
+	}
+}
+
+void AEnemyCharacter::MoveWithSocket()
+{
+	// Find Socket Transform
+	const FTransform SocketTransform = AttachedParent->GetMesh()->GetSocketTransform(AttachedSocketName);
+	// Check if socket is valid
+	if (SocketTransform.IsValid())
+	{
+		// Set Actor Location to Socket Location
+		SetActorLocation(SocketTransform.GetLocation());
+		// Set Actor Rotation to Socket Rotation
+		SetActorRotation(SocketTransform.GetRotation());
+		// If attach flag is true
+		if (bIsAttached)
+			// Schedule next move
+			GetWorldTimerManager().SetTimerForNextTick(	this, &AEnemyCharacter::MoveWithSocket);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Socket %s not found in %s"), *GetAttachParentSocketName().ToString(), *GetName());
+	}
+
+}
+
+void AEnemyCharacter::DetachEnemyFromSocket()
+{
+	// Set Attach Flag
+	bIsAttached = false;
+	// Enable Collision
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+}
+

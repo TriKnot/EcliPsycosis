@@ -122,6 +122,18 @@ public:
 	UFUNCTION(BlueprintCallable, Category = AI)
 	void CustomJump(const FVector& Destination, float Height, float Speed);
 
+	/** Move this enemy to socket transform and start moving it with the socket on tick */
+	UFUNCTION(BlueprintCallable, Category = AI)
+	void AttachEnemyToSocketOnCharacter(ACharacter* OtherActor, FName SocketName);
+
+	/** Move with the socket on tick */
+	UFUNCTION(BlueprintCallable, Category = AI)
+	void MoveWithSocket();
+
+	/** Detach Actor from Socket */
+	UFUNCTION(BlueprintCallable, Category = AI)
+	void DetachEnemyFromSocket();
+
 private:
 
 	//** Player Character */
@@ -135,6 +147,18 @@ private:
 	//** Damage Effect */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = AI, meta = (AllowPrivateAccess = "true"))
 	class UDamageEffect* DamageEffect;
+
+	//** Attached parent */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = AI, meta = (AllowPrivateAccess = "true"))
+	ACharacter* AttachedParent;
+
+	//** Attached Socket Name */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = AI, meta = (AllowPrivateAccess = "true"))
+	FName AttachedSocketName;
+
+	//** Attached bool flag */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = AI, meta = (AllowPrivateAccess = "true"))
+	bool bIsAttached;
 
 	
 	//////////////////* Stats *////////////////////
