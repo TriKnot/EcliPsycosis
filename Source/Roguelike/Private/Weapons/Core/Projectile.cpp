@@ -107,6 +107,16 @@ void AProjectile::Tick(float DeltaTime)
 void AProjectile::Init(AActor* _InTarget, ECanDamageTypes _CanDamageTypes, AActor* _InOwner)
 {
 	Target = _InTarget;
+	// Rotate to face the Target
+	if(Target)
+	{
+		const FVector TargetLocation = Target->GetActorLocation();
+		const FVector CurrentLocation = GetActorLocation();
+		const FVector Direction = TargetLocation - CurrentLocation;
+		const FRotator TargetRotation = Direction.Rotation();
+		SetActorRotation(TargetRotation);
+	}
+	bShouldMove = true;
 	CanDamageTypes = _CanDamageTypes;
 	SetOwner(_InOwner);
 	HitCapsule->OnComponentBeginOverlap.AddDynamic(this, &AProjectile::OnProjectileOverlap);

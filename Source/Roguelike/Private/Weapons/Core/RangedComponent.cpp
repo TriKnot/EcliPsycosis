@@ -51,7 +51,21 @@ void URangedComponent::LightAttack()
 		return;
 	if(MaxAmmunition > 0 && CurrentAmmunition <= 0)
 		return;
-	SpawnProjectile( LightProjectileClass );
+	// Check if we have a prepared projectile and if the projectile is of the correct type
+	if(!PreparedProjectile)
+	{
+		PreparedProjectile = SpawnProjectile( LightProjectileClass );
+	}
+	if(PreparedProjectile->GetClass() != LightProjectileClass)
+	{
+		PreparedProjectile->Destroy();
+		PreparedProjectile = nullptr;
+		PreparedProjectile = SpawnProjectile( LightProjectileClass );
+	}
+
+	// Shoot the projectile
+	ShootPreparedProjectile();
+	
 	OnLightAttack.Broadcast();
 	OnAttackStateChanged.Broadcast(true);
 }
@@ -62,7 +76,21 @@ void URangedComponent::HeavyAttack()
 		return;
 	if(MaxAmmunition > 0 && CurrentAmmunition <= 0)
 		return;
-	SpawnProjectile( HeavyProjectileClass );
+	// Check if we have a prepared projectile and if the projectile is of the correct type
+	if(!PreparedProjectile)
+	{
+		PreparedProjectile = SpawnProjectile( HeavyProjectileClass );
+	}
+	if(PreparedProjectile->GetClass() != HeavyProjectileClass)
+	{
+		PreparedProjectile->Destroy();
+		PreparedProjectile = nullptr;
+		PreparedProjectile = SpawnProjectile( HeavyProjectileClass );
+	}
+
+	// Shoot the projectile
+	ShootPreparedProjectile();
+	
 	OnHeavyAttack.Broadcast();
 	OnAttackStateChanged.Broadcast(true);
 }
@@ -73,7 +101,20 @@ void URangedComponent::WeaponAbility()
 		return;
 	if(MaxAmmunition > 0 && CurrentAmmunition <= 0)
 		return;
-	SpawnProjectile( AbilityProjectileClass );
+	// Check if we have a prepared projectile and if the projectile is of the correct type
+	if(!PreparedProjectile)
+	{
+		PreparedProjectile = SpawnProjectile( AbilityProjectileClass );
+	}
+	if(PreparedProjectile->GetClass() != AbilityProjectileClass)
+	{
+		PreparedProjectile->Destroy();
+		PreparedProjectile = nullptr;
+		PreparedProjectile = SpawnProjectile( AbilityProjectileClass );
+	}
+
+	// Shoot the projectile
+	ShootPreparedProjectile();
 	OnWeaponAbility.Broadcast();
 	OnAttackStateChanged.Broadcast(true);
 }
@@ -95,20 +136,26 @@ void URangedComponent::Reload(int32 AmmoToReload)
 	OnReloadStateChanged.Broadcast(true);
 }
 
-void URangedComponent::SpawnProjectile(TSubclassOf<AProjectile> ProjectileClass )
+AProjectile* URangedComponent::SpawnProjectile(TSubclassOf<AProjectile> ProjectileClass )
 {
-	if (!ProjectileClass)
-		return;
+	return GetWorld()->SpawnActor<AProjectile>(ProjectileClass, GetOwner()->GetActorLocation(), GetOwner()->GetActorRotation());
+}
 
+void URangedComponent::ShootPreparedProjectile()
+{
 	CurrentAmmunition--;
 	StartCooldownTimer();
-	
-	AProjectile* Projectile = GetWorld()->SpawnActor<AProjectile>(ProjectileClass, FirePoint->GetComponentLocation(), FirePoint->GetComponentRotation());
-	
-	if (Projectile)
+
+	if (PreparedProjectile)
 	{
-		Projectile->Init(Target, CanDamageTypes, GetOwner());
+		// Set location and rotation of the projectile
+		PreparedProjectile->SetActorRotation(GetOwner()->GetActorRotation());
+		// Make sure it's detached from the owner
+		PreparedProjectile->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+		// Init the projectile
+		PreparedProjectile->Init(Target, CanDamageTypes, GetOwner());
 	}
+	PreparedProjectile = nullptr;
 }
 
 

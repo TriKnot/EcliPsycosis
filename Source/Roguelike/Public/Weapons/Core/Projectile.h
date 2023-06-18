@@ -138,6 +138,6 @@ private:
 	float OnHitDamageTime = 0.1f;
 
 	/** Set to false when projectile should stop moving */
-	bool bShouldMove = true;
+	bool bShouldMove = false;
 	
 };

@@ -77,7 +77,11 @@ public:
 	UFUNCTION(BlueprintCallable)
 	FORCEINLINE void SetFirePoint(USceneComponent* _FirePoint) { FirePoint = _FirePoint; };
 
+	UFUNCTION(BlueprintCallable)
+	FORCEINLINE void MoveFirePointTo(FTransform _FirePoint) { FirePoint->SetWorldTransform(_FirePoint); };
 
+	UFUNCTION(BlueprintCallable)
+	FORCEINLINE void SetPreparedProjectile(AProjectile* _Projectile) { PreparedProjectile = _Projectile; };
 	
 	/** Configurator Variables **/
 
@@ -136,7 +140,11 @@ public:
 
 private:
 
-	void SpawnProjectile(TSubclassOf<AProjectile> ProjectileClass );
+	UFUNCTION(BlueprintCallable)
+	AProjectile* SpawnProjectile(TSubclassOf<AProjectile> ProjectileClass );
+
+	UFUNCTION(BlueprintCallable)
+	void ShootPreparedProjectile();
 	
 	/** Projectile Class to Spawn **/
 	UPROPERTY(EditAnywhere, Category = "Configurator")
@@ -153,5 +161,8 @@ private:
 
 	UPROPERTY(VisibleAnywhere)
 	USceneComponent* FirePoint;
+
+	UPROPERTY(VisibleAnywhere)
+	AProjectile* PreparedProjectile;
 	
 };
