@@ -29,7 +29,7 @@ public:
 	FOnPlayerDeath OnPlayerDeath;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	FName MainMenuLevel;
+	FName OnDeathNextLevelName;
 
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
 	void SetDamageBoxPos(USceneComponent* ParentComp);

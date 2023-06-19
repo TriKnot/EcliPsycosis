@@ -310,11 +310,11 @@ void APlayerCharacter::ReceiveDamage(float _InDamage, FAttackEffect _EffectType)
 
 void APlayerCharacter::PlayerDeath() const
 {
-	if (!MainMenuLevel.ToString().IsEmpty())
+	if (!OnDeathNextLevelName.ToString().IsEmpty())
 	{
-		OnPlayerDeath.Broadcast();
-		UGameplayStatics::OpenLevel(GetWorld(), MainMenuLevel);
+		UGameplayStatics::OpenLevel(GetWorld(), OnDeathNextLevelName);
 	}
+	OnPlayerDeath.Broadcast();
 }
 
 UEffectController* APlayerCharacter::ImplementModifier(FModifierSet _InSet, const TScriptInterface<IPickupItem>& Item, bool bIsUIItem)
