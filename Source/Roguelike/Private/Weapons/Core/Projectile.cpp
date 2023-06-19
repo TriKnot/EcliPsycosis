@@ -6,17 +6,16 @@
 #include "EnemyCharacter.h"
 #include "PlayerCharacter.h"
 #include "Components/CapsuleComponent.h"
-#include "Components/ShapeComponent.h"
 #include "Components/SphereComponent.h"
 #include "Damage/DamageSystem.h"
-#include "Weapons/Core/Weapon.h"
 
 // Sets default values
 AProjectile::AProjectile()
 {
 
-	RootComponent = CreateDefaultSubobject<USceneComponent>("Root");
-	
+	RootCapsule = CreateDefaultSubobject<UCapsuleComponent>("Root");
+	RootCapsule->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	RootComponent = RootCapsule;
 	
 	HitCapsule = CreateDefaultSubobject<UCapsuleComponent>("HitBox");
 	HitCapsule->SetupAttachment(RootComponent);
@@ -128,6 +127,16 @@ void AProjectile::SetDamageSphereRadius(float _Radius)
 		DamageSphere->SetSphereRadius(_Radius);
 }
 
+void AProjectile::EnablePhysics()
+{
+	// Enable collision for root component
+	RootCapsule->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	RootCapsule->SetSimulatePhysics(true);
+	RootCapsule->SetEnableGravity(true);
+	RootCapsule->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
+	
+}
+
 void AProjectile::MoveProjectile(float DeltaTime)
 {
 	FVector Direction;
@@ -212,4 +221,10 @@ void AProjectile::Despawn()
 		GetWorld()->GetTimerManager().ClearTimer(DespawnTimerHandle);
 	
 	Destroy();
+}
+
+void AProjectile::Despawn(float Delay)
+{
+	// Schedule Despawn
+	GetWorld()->GetTimerManager().SetTimer(DespawnTimerHandle, this, &AProjectile::Despawn, Delay, false);
 }

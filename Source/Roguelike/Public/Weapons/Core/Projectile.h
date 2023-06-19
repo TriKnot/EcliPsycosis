@@ -35,6 +35,10 @@ private:
 	UFUNCTION()
 	void OnHitOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
 	                  int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	/** Root Capsule Component */
+	UPROPERTY(EditDefaultsOnly)
+	UCapsuleComponent* RootCapsule;
 	
 	/** Mesh Component */
 	UPROPERTY(EditDefaultsOnly)
@@ -73,6 +77,11 @@ public:
 
 	/** Set Damage Sphere Radius -> Only use this to change during runtime, in editor please change in BP */
 	void SetDamageSphereRadius(float _Radius);
+
+	/** Enable Physics Simulation and enable collision for root */
+	UFUNCTION( BlueprintCallable )
+	void EnablePhysics();
+	
 private:
 	/** Function to move projectile along path -> Called in Tick */
 	void MoveProjectile(float DeltaTime);
@@ -89,6 +98,10 @@ private:
 
 	/** Despawn and clean up projectile */
 	void Despawn();
+
+	/** Despawn with delay */
+	UFUNCTION(BlueprintCallable)
+	void Despawn(float Delay);
 
 	/** Despawn Timer Handle */
 	FTimerHandle DespawnTimerHandle;
