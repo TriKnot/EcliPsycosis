@@ -8,8 +8,12 @@
 #include "CustomStructs/EnumSet.h"
 #include "Projectile.generated.h"
 
+class UBoxComponent;
 class UCapsuleComponent;
 class USphereComponent;
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnCollisionDelegate);
+
 
 UCLASS()
 class ROGUELIKE_API AProjectile : public AActor
@@ -20,6 +24,10 @@ public:
 	// Sets default values for this actor's properties
 	AProjectile();
 
+	// On Collision Delegate
+	UPROPERTY(BlueprintAssignable, BlueprintCallable)
+	FOnCollisionDelegate OnCollisionDelegate;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -27,6 +35,7 @@ protected:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 private:
+	
 	/** Handles checking for hit */
 	UFUNCTION()
 	void OnProjectileOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
@@ -37,8 +46,8 @@ private:
 	                  int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
 	/** Root Capsule Component */
-	UPROPERTY(EditDefaultsOnly)
-	UCapsuleComponent* RootCapsule;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
+	UBoxComponent* Root;
 	
 	/** Mesh Component */
 	UPROPERTY(EditDefaultsOnly)
@@ -54,7 +63,11 @@ private:
 
 	/** Ignored classes */
 	UPROPERTY(EditDefaultsOnly)
-	TArray<TSubclassOf<AActor>> IgnoredClasses;	
+	TArray<TSubclassOf<AActor>> IgnoredClasses;
+
+	/** Array of meshes to use at random */
+	UPROPERTY(EditDefaultsOnly)
+	TArray<UStaticMesh*> RandomMeshes;
 
 public:	
 	// Called every frame
@@ -80,7 +93,19 @@ public:
 
 	/** Enable Physics Simulation and enable collision for root */
 	UFUNCTION( BlueprintCallable )
-	void EnablePhysics();
+	void EnablePhysics(FVector StartImpulse = FVector::ZeroVector);
+
+	/** Disable Physics Simulation and disable collision for root */
+	UFUNCTION( BlueprintCallable )
+	void DisablePhysics();
+
+	/** Blueprint Event for EnablePhysics with delay */
+	UFUNCTION( BlueprintImplementableEvent, BlueprintCallable )
+	void EnablePhysicsWithDelay(float Delay, FVector StartImpulse = FVector::ZeroVector);
+
+	/** Blueprint Event for DisablePhysics with delay */
+	UFUNCTION( BlueprintImplementableEvent, BlueprintCallable )
+	void DisablePhysicsWithDelay(float Delay);
 	
 private:
 	/** Function to move projectile along path -> Called in Tick */

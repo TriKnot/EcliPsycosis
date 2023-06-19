@@ -13,9 +13,9 @@
 AProjectile::AProjectile()
 {
 
-	RootCapsule = CreateDefaultSubobject<UCapsuleComponent>("Root");
-	RootCapsule->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	RootComponent = RootCapsule;
+	Root = CreateDefaultSubobject<UBoxComponent>("Root");
+	Root->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	RootComponent = Root;
 	
 	HitCapsule = CreateDefaultSubobject<UCapsuleComponent>("HitBox");
 	HitCapsule->SetupAttachment(RootComponent);
@@ -42,6 +42,11 @@ AProjectile::AProjectile()
 void AProjectile::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if( RandomMeshes.Num() > 0 )
+	{
+		MeshComponent->SetStaticMesh(RandomMeshes[FMath::RandRange(0, RandomMeshes.Num() - 1)]);
+	}
 	
 }
 
@@ -70,6 +75,9 @@ void AProjectile::OnProjectileOverlap(UPrimitiveComponent* OverlappedComponent, 
 	}
 	
 	ToggleHitBox(true);
+
+	OnCollisionDelegate.Broadcast();
+	
 	bShouldMove = false;
 	// Schedule Despawn
 	if(OnHitDamageTime > 0.f)
@@ -127,13 +135,30 @@ void AProjectile::SetDamageSphereRadius(float _Radius)
 		DamageSphere->SetSphereRadius(_Radius);
 }
 
-void AProjectile::EnablePhysics()
+void AProjectile::EnablePhysics(FVector StartImpulse)
 {
 	// Enable collision for root component
-	RootCapsule->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-	RootCapsule->SetSimulatePhysics(true);
-	RootCapsule->SetEnableGravity(true);
-	RootCapsule->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
+	Root->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	Root->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
+	Root->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
+	
+	// Enable physics for root component
+	Root->SetSimulatePhysics(true);
+	Root->SetEnableGravity(true);
+
+	// Apply impulse
+	Root->AddImpulse(StartImpulse, NAME_None, true);
+}
+
+void AProjectile::DisablePhysics()
+{
+	// Disable collision for root component
+	Root->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	Root->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+
+	// Disable physics for root component
+	Root->SetSimulatePhysics(false);
+	Root->SetEnableGravity(false);
 	
 }
 
