@@ -344,9 +344,9 @@ void APlayerCharacter::ConsolidateModifier()
 	for (const auto Mod : ModSets)
 	{
 		ModifierSet.SpeedModifier += ( Mod->SpeedModifier - 1.0f );
-		ModifierSet.LightAttackModifier += Mod->LightAttackModifier;
-		ModifierSet.HeavyAttackModifier += Mod->HeavyAttackModifier;
-		ModifierSet.WeaponAbilityModifier += Mod->WeaponAbilityModifier;
+		ModifierSet.LightAttackModifier += (Mod->LightAttackModifier - 1.0f);
+		ModifierSet.HeavyAttackModifier += (Mod->HeavyAttackModifier - 1.0f);
+		ModifierSet.WeaponAbilityModifier += (Mod->WeaponAbilityModifier - 1.0f);
 		if (Mod->LightAttackEffect != EEffectTypes::AE_None)
 		{
 			ModifierSet.LightAttackEffect = Mod->LightAttackEffect;

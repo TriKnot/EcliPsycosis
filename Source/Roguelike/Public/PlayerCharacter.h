@@ -245,8 +245,8 @@ public:
 	FORCEINLINE void SetHealth(int32 _Health)
 	{
 		Health = _Health;
-		if(HurtBox)
-			HurtBox->OnReceivedDamage.Broadcast(0,EEffectTypes::AE_None);
+		/*if(HurtBox)
+			HurtBox->OnReceivedDamage.Broadcast(0,EEffectTypes::AE_None);*/
 	}	
 
 private:

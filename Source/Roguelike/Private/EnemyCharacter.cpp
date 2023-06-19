@@ -114,7 +114,7 @@ void AEnemyCharacter::BeginPlay()
 		RangedComponent->SetTarget(PlayerCharacter);
 
 	//Set Default Health
-	Health = MaxHealth;
+	//Health = MaxHealth;
 
 	// Save max movement speed set in editor
 	MovementSpeed = GetCharacterMovement()->MaxWalkSpeed;
