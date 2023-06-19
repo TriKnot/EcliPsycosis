@@ -15,10 +15,10 @@ void UEclipseSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 		switch (CurrentNatureState)
 		{
 			case ENatureState::Sun:
-				DayCycleTime = CurrentGI->RemainingTime < 0.0f ? CurrentGI->RemainingTime : DAYTIME;
+				DayCycleTime = CurrentGI->RemainingTime > 0.0f ? CurrentGI->RemainingTime : DAYTIME;
 				break;
 			case ENatureState::Eclipse:
-				EclipseCycleTime = CurrentGI->RemainingTime < 0.0f ? CurrentGI->RemainingTime : ECLIPSETIME;
+				EclipseCycleTime = CurrentGI->RemainingTime > 0.0f ? CurrentGI->RemainingTime : ECLIPSETIME;
 				break;
 		}
 	}
