@@ -334,7 +334,7 @@ UEffectController* APlayerCharacter::ImplementModifier(FModifierSet _InSet, cons
 
 	//Send the Data to Create Widget
 	if(_InSet.HPModifier != 0.0f)
-		AddHealth(MaxHealth * _InSet.HPModifier);
+		AddHealth(MaxHealth * (_InSet.HPModifier - 1.0f));
 
 	return _temp;
 }
