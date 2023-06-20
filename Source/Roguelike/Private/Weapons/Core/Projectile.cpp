@@ -126,7 +126,7 @@ void AProjectile::Init(AActor* _InTarget, ECanDamageTypes _CanDamageTypes, AActo
 	bShouldMove = true;
 	CanDamageTypes = _CanDamageTypes;
 	SetOwner(_InOwner);
-	HitCapsule->OnComponentBeginOverlap.AddDynamic(this, &AProjectile::OnProjectileOverlap);
+	HitCapsule->OnComponentBeginOverlap.AddUniqueDynamic(this, &AProjectile::OnProjectileOverlap);
 }
 
 void AProjectile::SetDamageSphereRadius(float _Radius)
@@ -191,7 +191,7 @@ void AProjectile::ToggleHitBox(bool bIsEnabled)
 {
 	if(bIsEnabled)
 	{
-		DamageSphere->OnComponentBeginOverlap.AddDynamic(this, &AProjectile::OnHitOverlap);
+		DamageSphere->OnComponentBeginOverlap.AddUniqueDynamic(this, &AProjectile::OnHitOverlap);
 
 		// Enable collision for the HitBox
 		DamageSphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
