@@ -333,7 +333,8 @@ UEffectController* APlayerCharacter::ImplementModifier(FModifierSet _InSet, cons
 	ConsolidateModifier();
 
 	//Send the Data to Create Widget
-	AddHealth(Health * _InSet.HPModifier);
+	if(_InSet.HPModifier != 0.0f)
+		AddHealth(Health * _InSet.HPModifier);
 
 	return _temp;
 }
@@ -380,6 +381,7 @@ void APlayerCharacter::ClearModifier(UEffectController* _OutgoingController)
 void APlayerCharacter::AddHealth(float _InHealth)
 {
 	Health = FMath::Clamp(Health += _InHealth, 0.0f, MaxHealth);
+	OnHealthChanged.Broadcast(Health, MaxHealth);
 }
 
 void APlayerCharacter::OverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)

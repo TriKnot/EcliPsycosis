@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "HurtBox.h"
 #include "GameFramework/Character.h"
-#include "Damage/DamageSystem.h"
 #include "Items/PickupItem.h"
 #include "CustomStructs/StructSet.h"
 #include "CustomStructs/EnumSet.h"
@@ -13,6 +12,7 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDashStateChanged, bool, bDashState);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerDeath);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnHealthChanged, float, CurrentHealth, float, MaxHealth);
 
 class UEffectController;
 
@@ -27,6 +27,9 @@ public:
 	
 	UPROPERTY(BlueprintAssignable, BlueprintCallable)
 	FOnPlayerDeath OnPlayerDeath;
+
+	UPROPERTY(BlueprintCallable, BlueprintAssignable)
+	FOnHealthChanged OnHealthChanged;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	FName OnDeathNextLevelName;
@@ -245,8 +248,7 @@ public:
 	FORCEINLINE void SetHealth(int32 _Health)
 	{
 		Health = _Health;
-		/*if(HurtBox)
-			HurtBox->OnReceivedDamage.Broadcast(0,EEffectTypes::AE_None);*/
+		OnHealthChanged.Broadcast(Health, MaxHealth);
 	}	
 
 private:
